@@ -1,5 +1,18 @@
+# Christian Tolger
+# 15.9.2023
+# v1.2
+# Full Comment Version
+
 import gturtle as gt
 import os
+import Main
+import Values
+
+screenX = Values.screenW
+screenY = Values.screenH
+
+mX = screenX / 800
+mY = screenY / 800 # Teilen durch 800, da das Schachfeld in einem 800 x 800 Feld eingerichtet ist
 
 file_dir = os.path.dirname(__file__) # Speichern des Verzeichnisses, in dem das Programm läuft in der Variable file_dir, damit die Figurtexturen im Ordner in diesem Verzeichniss gefunden werden können 
 chess_figures = "chessfigures/" # Name des Ordners indem sich die Texturen für die Schachfiguren befinden
@@ -8,17 +21,17 @@ chess_figure_file = os.path.join(file_dir, chess_figures) # Anfügen des Ordnern
 ### Schachfeld ###
                 #     0            1          2           3           4        5       6        7        8         9          10             11         12     13
 chess_field = [ # field_key, field_number, figure, figure_texture, left_x, y_above, right_x, y_down, center_x, center_y, field_texture, figure_color, collum, row
-    ("8a", 1, "black_1_rock", chess_figure_file + "chessblack_2.png", -400, 400, -300, 300, -350, 350, "white", "black", 1, 1), ("8b", 2, "black_knight", chess_figure_file + "chessblack_3.png", -300, 400, -200, 300, -250, 350, "gray", "black", 1, 2), ("8c", 3, "black_bishop", chess_figure_file + "chessblack_4.png", -200, 400, -100, 300, -150, 350, "white", "black", 1, 3), ("8d", 4, "black_queen", chess_figure_file + "chessblack_1.png", -100, 400, 0, 300, -50, 350, "gray", "black", 1, 4), ("8e", 5, "black_king", chess_figure_file + "chessblack_0.png", 0, 400, 100, 300, 50, 350, "white", "black", 1, 5), ("8f", 6, "black_bishop", chess_figure_file + "chessblack_4.png", 100, 400, 200, 300, 150, 350, "gray", "black", 1, 6), ("8g", 7, "black_knight", chess_figure_file + "chessblack_3.png", 200, 400, 300, 300, 250, 350, "white", "black", 1, 7), ("8h", 8, "black_2_rock", chess_figure_file + "chessblack_2.png", 300, 400, 400, 300, 350, 350, "gray", "black", 1, 8),
-    ("7a", 9, "black_pawn", chess_figure_file + "chessblack_5.png", -400, 300, -300, 200, -350, 250, "gray", "black", 2, 1), ("7b", 10, "black_pawn", chess_figure_file + "chessblack_5.png", -300, 300, -200, 200, -250, 250, "white", "black", 2, 2), ("7c", 11, "black_pawn", chess_figure_file + "chessblack_5.png", -200, 300, -100, 200, -150, 250, "gray", "black", 2, 3), ("7d", 12, "black_pawn", chess_figure_file + "chessblack_5.png", -100, 300, 0, 200, -50, 250, "white", "black", 2, 4), ("7e", 13, "black_pawn", chess_figure_file + "chessblack_5.png", 0, 300, 100, 200, 50, 250, "gray", "black", 2, 5), ("7f", 14, "black_pawn", chess_figure_file + "chessblack_5.png", 100, 300, 200, 200, 150, 250, "white", "black", 2, 6), ("7g", 15, "black_pawn", chess_figure_file + "chessblack_5.png", 200, 300, 300, 200, 250, 250, "gray", "black", 2, 7), ("7h", 16, "black_pawn", chess_figure_file + "chessblack_5.png", 300, 300, 400, 200, 350, 250, "white", "black", 2, 8),
-    ("6a", 17, "", "", -400, 200, -300, 100, -350, 150, "white", "", 3, 1), ("6b", 18, "", "", -300, 200, -200, 100, -250, 150, "gray", "", 3, 2), ("6c", 19, "", "", -200, 200, -100, 100, -150, 150, "white", "", 3, 3), ("6d", 20, "", "", -100, 200, 0, 100, -50, 150, "gray", "", 3, 4), ("6e", 21, "", "", 0, 200, 100, 100, 50, 150, "white", "", 3, 5), ("6f", 22, "", "", 100, 200, 200, 100, 150, 150, "gray", "", 3, 6), ("6g", 23, "", "", 200, 200, 300, 100, 250, 150, "white", "", 3, 7), ("6h", 24, "", "", 300, 200, 400, 100, 350, 150, "gray", "", 3, 8), 
-    ("5a", 25, "", "", -400, 100, -300, 0, -350, 50, "gray", "", 4, 1), ("5b", 26, "", "", -300, 100, -200, 0, -250, 50, "white", "", 4, 2), ("5c", 27, "", "", -200, 100, -100, 0, -150, 50, "gray", "", 4, 3), ("5d", 28, "", "", -100, 100, 0, 0, -50, 50, "white", "", 4, 4), ("5e", 29, "", "", 0, 100, 100, 0, 50, 50, "gray", "", 4, 5), ("5f", 30, "", "", 100, 100, 200, 0, 150, 50, "white", "", 4, 6), ("5g", 31, "", "", 200, 100, 300, 0, 250, 50, "gray", "", 4, 7), ("5h", 32, "", "", 300, 100, 400, 0, 350, 50, "white", "", 4, 8), 
-    ("4a", 33, "", "", -400, 0, -300, -100, -350, -50, "white", "", 5, 1), ("4b", 34, "", "", -300, 0, -200, -100, -250, -50, "gray", "", 5, 2), ("4c", 35, "", "", -200, 0, -100, -100, -150, -50, "white", "", 5, 3), ("4d", 36, "", "", -100, 0, 0, -100, -50, -50, "gray", "", 5, 4), ("4e", 37, "", "", 0, 0, 100, -100, 50, -50, "white", "", 5, 5), ("4f", 38, "", "", 100, 0, 200, -100, 150, -50, "gray", "", 5, 6), ("4g", 39, "", "", 200, 0, 300, -100, 250, -50, "white", "", 5, 7), ("4h", 40, "", "", 300, 0, 400, -100, 350, -50, "gray", "", 5, 8),
-    ("3a", 41, "", "", -400, -100, -300, -200, -350, -150, "gray", "", 6, 1), ("3b", 42, "", "", -300, -100, -200, -200, -250, -150, "white", "", 6, 2), ("3c", 43, "", "", -200, -100, -100, -200, -150, -150, "gray", "", 6, 3), ("3d", 44, "", "", -100, -100, 0, -200, -50, -150, "white", "", 6, 4), ("3e", 45, "", "", 0, -100, 100, -200, 50, -150, "gray", "", 6, 5), ("3f", 46, "", "", 100, -100, 200, -200, 150, -150, "white", "", 6, 6), ("3g", 47, "", "", 200, -100, 300, -200, 250, -150, "gray", "", 6, 7), ("3h", 48, "", "", 300, -100, 400, -200, 350, -150, "white", "", 6, 8),
-    ("2a", 49, "white_pawn", chess_figure_file + "chesswhite_5.png", -400, -200, -300, -300, -350, -250, "white", "white", 7, 1), ("2b", 50, "white_pawn", chess_figure_file + "chesswhite_5.png", -300, -200, -200, -300, -250, -250, "gray", "white", 7, 2), ("2c", 51, "white_pawn", chess_figure_file + "chesswhite_5.png", -200, -200, -100, -300, -150, -250, "white", "white", 7, 3), ("2d", 52, "white_pawn", chess_figure_file + "chesswhite_5.png", -100, -200, 0, -300, -50, -250, "gray", "white", 7, 4), ("2e", 53, "white_pawn", chess_figure_file + "chesswhite_5.png", 0, -200, 100, -300, 50, -250, "white", "white", 7, 5), ("2f", 54, "white_pawn", chess_figure_file + "chesswhite_5.png", 100, -200, 200, -300, 150, -250, "gray", "white", 7, 6), ("2g", 55, "white_pawn", chess_figure_file + "chesswhite_5.png", 200, -200, 300, -300, 250, -250, "white", "white", 7, 7), ("2h", 56, "white_pawn", chess_figure_file + "chesswhite_5.png", 300, -200, 400, -300, 350, -250, "gray", "white", 7, 8),
-    ("1a", 57, "white_1_rock", chess_figure_file + "chesswhite_2.png", -400, -300, -300, -400, -350, -350, "gray", "white", 8, 1), ("1b", 58, "white_knight", chess_figure_file + "chesswhite_3.png", -300, -300, -200, -400, -250, -350, "white", "white", 8, 2), ("1c", 59, "white_bishop", chess_figure_file + "chesswhite_4.png", -200, -300, -100, -400, -150, -350, "gray", "white", 8, 3), ("1d", 60, "white_queen", chess_figure_file + "chesswhite_1.png", -100, -300, 0, -400, -50, -350, "white", "white", 8, 4), ("1e", 61, "white_king", chess_figure_file + "chesswhite_0.png", 0, -300, 100, -400, 50, -350, "gray", "white", 8, 5), ("1f", 62, "white_bishop", chess_figure_file + "chesswhite_4.png", 100, -300, 200, -400, 150, -350, "white", "white", 8, 6), ("1g", 63, "white_knight", chess_figure_file + "chesswhite_3.png", 200, -300, 300, -400, 250, -350, "gray", "white", 8, 7), ("1h", 64, "white_2_rock", chess_figure_file + "chesswhite_2.png", 300, -300, 400, -400, 350, -350, "white", "white", 8, 8)
+    ("8a", 1, "black_1_rock", chess_figure_file + "chessblack_2.png", -400 * mX, 400 * mY, -300 * mX, 300 * mY, -350 * mX, 350 * mY, "white", "black", 1, 1), ("8b", 2, "black_knight", chess_figure_file + "chessblack_3.png", -300 * mX, 400 * mY, -200 * mX, 300 * mY, -250 * mX, 350 * mY, "gray", "black", 1, 2), ("8c", 3, "black_bishop", chess_figure_file + "chessblack_4.png", -200 * mX, 400 * mY, -100 * mX, 300 * mY, -150 * mX, 350 * mY, "white", "black", 1, 3), ("8d", 4, "black_queen", chess_figure_file + "chessblack_1.png", -100 * mX, 400 * mY, 0 * mX, 300 * mY, -50 * mX, 350 * mY, "gray", "black", 1, 4), ("8e", 5, "black_king", chess_figure_file + "chessblack_0.png", 0 * mX, 400 * mY, 100 * mX, 300 * mY, 50 * mX, 350 * mY, "white", "black", 1, 5), ("8f", 6, "black_bishop", chess_figure_file + "chessblack_4.png", 100 * mX, 400 * mY, 200 * mX, 300 * mY, 150 * mX, 350 * mY, "gray", "black", 1, 6), ("8g", 7, "black_knight", chess_figure_file + "chessblack_3.png", 200 * mX, 400 * mY, 300 * mX, 300 * mY, 250 * mX, 350 * mY, "white", "black", 1, 7), ("8h", 8, "black_2_rock", chess_figure_file + "chessblack_2.png", 300 * mX, 400 * mY, 400 * mX, 300 * mY, 350 * mX, 350 * mY, "gray", "black", 1, 8),
+    ("7a", 9, "black_pawn", chess_figure_file + "chessblack_5.png", -400 * mX, 300 * mY, -300 * mX, 200 * mY, -350 * mX, 250 * mY, "gray", "black", 2, 1), ("7b", 10, "black_pawn", chess_figure_file + "chessblack_5.png", -300 * mX, 300 * mY, -200 * mX, 200 * mY, -250 * mX, 250 * mY, "white", "black", 2, 2), ("7c", 11, "black_pawn", chess_figure_file + "chessblack_5.png", -200 * mX, 300 * mY, -100 * mX, 200 * mY, -150 * mX, 250 * mY, "gray", "black", 2, 3), ("7d", 12, "black_pawn", chess_figure_file + "chessblack_5.png", -100 * mX, 300 * mY, 0 * mX, 200 * mY, -50 * mX, 250 * mY, "white", "black", 2, 4), ("7e", 13, "black_pawn", chess_figure_file + "chessblack_5.png", 0 * mX, 300 * mY, 100 * mX, 200 * mY, 50 * mX, 250 * mY, "gray", "black", 2, 5), ("7f", 14, "black_pawn", chess_figure_file + "chessblack_5.png", 100 * mX, 300 * mY, 200 * mX, 200 * mY, 150 * mX, 250 * mY, "white", "black", 2, 6), ("7g", 15, "black_pawn", chess_figure_file + "chessblack_5.png", 200 * mX, 300 * mY, 300 * mX, 200 * mY, 250 * mX, 250 * mY, "gray", "black", 2, 7), ("7h", 16, "black_pawn", chess_figure_file + "chessblack_5.png", 300 * mX, 300 * mY, 400 * mX, 200 * mY, 350 * mX, 250 * mY, "white", "black", 2, 8),
+    ("6a", 17, "", "", -400 * mX, 200 * mY, -300 * mX, 100 * mY, -350 * mX, 150 * mY, "white", "", 3, 1), ("6b", 18, "", "", -300 * mX, 200 * mY, -200 * mX, 100 * mY, -250 * mX, 150 * mY, "gray", "", 3, 2), ("6c", 19, "", "", -200 * mX, 200 * mY, -100 * mX, 100 * mY, -150 * mX, 150 * mY, "white", "", 3, 3), ("6d", 20, "", "", -100 * mX, 200 * mY, 0 * mX, 100 * mY, -50 * mX, 150 * mY, "gray", "", 3, 4), ("6e", 21, "", "", 0 * mX, 200 * mY, 100 * mX, 100 * mY, 50 * mX, 150 * mY, "white", "", 3, 5), ("6f", 22, "", "", 100 * mX, 200 * mY, 200 * mX, 100 * mY, 150 * mX, 150 * mY, "gray", "", 3, 6), ("6g", 23, "", "", 200 * mX, 200 * mY, 300 * mX, 100 * mY, 250 * mX, 150 * mY, "white", "", 3, 7), ("6h", 24, "", "", 300 * mX, 200 * mY, 400 * mX, 100 * mY, 350 * mX, 150 * mY, "gray", "", 3, 8), 
+    ("5a", 25, "", "", -400 * mX, 100 * mY, -300 * mX, 0 * mY, -350 * mX, 50 * mY, "gray", "", 4, 1), ("5b", 26, "", "", -300 * mX, 100 * mY, -200 * mX, 0 * mY, -250 * mX, 50 * mY, "white", "", 4, 2), ("5c", 27, "", "", -200 * mX, 100 * mY, -100 * mX, 0 * mY, -150 * mX, 50 * mY, "gray", "", 4, 3), ("5d", 28, "", "", -100 * mX, 100 * mY, 0 * mX, 0 * mY, -50 * mX, 50 * mY, "white", "", 4, 4), ("5e", 29, "", "", 0 * mX, 100 * mY, 100 * mX, 0 * mY, 50 * mX, 50 * mY, "gray", "", 4, 5), ("5f", 30, "", "", 100 * mX, 100 * mY, 200 * mX, 0 * mY, 150 * mX, 50 * mY, "white", "", 4, 6), ("5g", 31, "", "", 200 * mX, 100 * mY, 300 * mX, 0 * mY, 250 * mX, 50 * mY, "gray", "", 4, 7), ("5h", 32, "", "", 300 * mX, 100 * mY, 400 * mX, 0 * mY, 350 * mX, 50 * mY, "white", "", 4, 8), 
+    ("4a", 33, "", "", -400 * mX, 0 * mY, -300 * mX, -100 * mY, -350 * mX, -50 * mY, "white", "", 5, 1), ("4b", 34, "", "", -300 * mX, 0 * mY, -200 * mX, -100 * mY, -250 * mX, -50 * mY, "gray", "", 5, 2), ("4c", 35, "", "", -200 * mX, 0 * mY, -100 * mX, -100 * mY, -150 * mX, -50 * mY, "white", "", 5, 3), ("4d", 36, "", "", -100 * mX, 0 * mY, 0 * mX, -100 * mY, -50 * mX, -50 * mY, "gray", "", 5, 4), ("4e", 37, "", "", 0 * mX, 0 * mY, 100 * mX, -100 * mY, 50 * mX, -50 * mY, "white", "", 5, 5), ("4f", 38, "", "", 100 * mX, 0 * mY, 200 * mX, -100 * mY, 150 * mX, -50 * mY, "gray", "", 5, 6), ("4g", 39, "", "", 200 * mX, 0 * mY, 300 * mX, -100 * mY, 250 * mX, -50 * mY, "white", "", 5, 7), ("4h", 40, "", "", 300 * mX, 0 * mY, 400 * mX, -100 * mY, 350 * mX, -50 * mY, "gray", "", 5, 8),
+    ("3a", 41, "", "", -400 * mX, -100 * mY, -300 * mX, -200 * mY, -350 * mX, -150 * mY, "gray", "", 6, 1), ("3b", 42, "", "", -300 * mX, -100 * mY, -200 * mX, -200 * mY, -250 * mX, -150 * mY, "white", "", 6, 2), ("3c", 43, "", "", -200 * mX, -100 * mY, -100 * mX, -200 * mY, -150 * mX, -150 * mY, "gray", "", 6, 3), ("3d", 44, "", "", -100 * mX, -100 * mY, 0 * mX, -200 * mY, -50 * mX, -150 * mY, "white", "", 6, 4), ("3e", 45, "", "", 0 * mX, -100 * mY, 100 * mX, -200 * mY, 50 * mX, -150 * mY, "gray", "", 6, 5), ("3f", 46, "", "", 100 * mX, -100 * mY, 200 * mX, -200 * mY, 150 * mX, -150 * mY, "white", "", 6, 6), ("3g", 47, "", "", 200 * mX, -100 * mY, 300 * mX, -200 * mY, 250 * mX, -150 * mY, "gray", "", 6, 7), ("3h", 48, "", "", 300 * mX, -100 * mY, 400 * mX, -200 * mY, 350 * mX, -150 * mY, "white", "", 6, 8),
+    ("2a", 49, "white_pawn", chess_figure_file + "chesswhite_5.png", -400 * mX, -200 * mY, -300 * mX, -300 * mY, -350 * mX, -250 * mY, "white", "white", 7, 1), ("2b", 50, "white_pawn", chess_figure_file + "chesswhite_5.png", -300 * mX, -200 * mY, -200 * mX, -300 * mY, -250 * mX, -250 * mY, "gray", "white", 7, 2), ("2c", 51, "white_pawn", chess_figure_file + "chesswhite_5.png", -200 * mX, -200 * mY, -100 * mX, -300 * mY, -150 * mX, -250 * mY, "white", "white", 7, 3), ("2d", 52, "white_pawn", chess_figure_file + "chesswhite_5.png", -100 * mX, -200 * mY, 0 * mX, -300 * mY, -50 * mX, -250 * mY, "gray", "white", 7, 4), ("2e", 53, "white_pawn", chess_figure_file + "chesswhite_5.png", 0 * mX, -200 * mY, 100 * mX, -300 * mY, 50 * mX, -250 * mY, "white", "white", 7, 5), ("2f", 54, "white_pawn", chess_figure_file + "chesswhite_5.png", 100 * mX, -200 * mY, 200 * mX, -300 * mY, 150 * mX, -250 * mY, "gray", "white", 7, 6), ("2g", 55, "white_pawn", chess_figure_file + "chesswhite_5.png", 200 * mX, -200 * mY, 300 * mX, -300 * mY, 250 * mX, -250 * mY, "white", "white", 7, 7), ("2h", 56, "white_pawn", chess_figure_file + "chesswhite_5.png", 300 * mX, -200 * mY, 400 * mX, -300 * mY, 350 * mX, -250 * mY, "gray", "white", 7, 8),
+    ("1a", 57, "white_1_rock", chess_figure_file + "chesswhite_2.png", -400 * mX, -300 * mY, -300 * mX, -400 * mY, -350 * mX, -350 * mY, "gray", "white", 8, 1), ("1b", 58, "white_knight", chess_figure_file + "chesswhite_3.png", -300 * mX, -300 * mY, -200 * mX, -400 * mY, -250 * mX, -350 * mY, "white", "white", 8, 2), ("1c", 59, "white_bishop", chess_figure_file + "chesswhite_4.png", -200 * mX, -300 * mY, -100 * mX, -400 * mY, -150 * mX, -350 * mY, "gray", "white", 8, 3), ("1d", 60, "white_queen", chess_figure_file + "chesswhite_1.png", -100 * mX, -300 * mY, 0 * mX, -400 * mY, -50 * mX, -350 * mY, "white", "white", 8, 4), ("1e", 61, "white_king", chess_figure_file + "chesswhite_0.png", 0 * mX, -300 * mY, 100 * mX, -400 * mY, 50 * mX, -350 * mY, "gray", "white", 8, 5), ("1f", 62, "white_bishop", chess_figure_file + "chesswhite_4.png", 100 * mX, -300 * mY, 200 * mX, -400 * mY, 150 * mX, -350 * mY, "white", "white", 8, 6), ("1g", 63, "white_knight", chess_figure_file + "chesswhite_3.png", 200 * mX, -300 * mY, 300 * mX, -400 * mY, 250 * mX, -350 * mY, "gray", "white", 8, 7), ("1h", 64, "white_2_rock", chess_figure_file + "chesswhite_2.png", 300 * mX, -300 * mY, 400 * mX, -400 * mY, 350 * mX, -350 * mY, "white", "white", 8, 8)
 ]
 
-king_fields = [(50, 350, "white", "black"), (50, -350, "gray", "white")] # center_x, center_y, field_color, figure_color
+king_fields = [(50 * mX, 350 * mY, "white", "black"), (50 * mX, -350 * mY, "gray", "white")] # center_x, center_y, field_color, figure_color
 
 selected_field = []
 rochade_figure_place = []
@@ -37,12 +50,12 @@ def repaint(): # Neu zeichen des Schachfeldes nach einer Bewegung --->>> Einfach
     gt.clean("white") # Komplettes Fenster neu färben, da sonst Grafikfehler entstehen
     
     for i in range(-400, 401, 100): # Spaltenstriche, damit das colorieren der Felder korrekt funktioniert
-        gt.setPos(i, 400)
-        gt.moveTo(i, -400)
+        gt.setPos(i * mX, 400 * mY)
+        gt.moveTo(i * mX, -400 * mY)
     
     for i in range(-400, 401, 100): # Zeilenstirche, damit das colorieren der Felder korrekt funktioniert
-        gt.setPos(-400, i)
-        gt.moveTo(400, i)
+        gt.setPos(-400 * mX, i * mY)
+        gt.moveTo(400 * mX, i * mY)
     
     gt.heading(0) # Ausrichten der Blickrichtung der Turtle nach oben, damit die Figuren stehen und nicht liegen oder auf dem Kopf stehen
     for large_tupel in chess_field: # Für jedes Schachfeld die Mittelpunkt Koordinaten, die Feldfarbe und die sích auf dem Feld befindliche Figur entnehmen und im Folgendem aufs Spielfeld zeichnen
@@ -63,7 +76,7 @@ def repaint(): # Neu zeichen des Schachfeldes nach einer Bewegung --->>> Einfach
     gt.setTitle("Aktiver Spieler : " + aktiver_spieler_text + "  |    " + str(moves) + "  :  Zuege insgesamt --- Spielzeit :  " + str(int(timer)) + " min") # Nur in Minuten, da Timer nicht fortlaufend, sondern nur bei Aktionen aktualisiert wird
 
     
-gt.setPlaygroundSize(800, 800) # Feste Fenstergröße, in die das Schachfeld perfekt hinein passt
+gt.setPlaygroundSize(int(800 * mX), int(800 * mY)) # Feste Fenstergröße, in die das Schachfeld perfekt hinein passt
 gt.makeTurtle()
 gt.hideTurtle() # Zeichengeschwindigkeit auf instant speeed setzen und Turtle verstecken
 gt.setPenColor("black")
@@ -554,7 +567,7 @@ def figure_select(x, y): # Funktion die auf Aufruf des obigen Mauscallbacks aufg
                     decolor()
                     selected_field.append((center_x, center_y, field_texture, figure, field_number, collum, row))# Nach leeren und entfärben wird hier die neu ausgewählte Figur aufgenommen
                     selected_field.append(index) # Speichern des Indexes des ausgewählten Feldes | Wichtig für die move Funktion
-                    gt.setPos(center_x - 25, center_y)
+                    gt.setPos(center_x - (25 * mX) , center_y)
                     gt.setFillColor("lightblue") # Makieren der ausgewählten Figur durch färben des Feldes unter ihr
                     gt.fill()
                     
@@ -592,19 +605,19 @@ def figure_select(x, y): # Funktion die auf Aufruf des obigen Mauscallbacks aufg
                           
                     for f in last_possible_fields: # Färben der möglichen Züge 
                         f_x, f_y, field_texture, f_number = f
-                        gt.setPos(f_x - 25, f_y) # -25, da es sonst zu Färbfehlern kommt
+                        gt.setPos(f_x - (25 * mX), f_y) # -25, da es sonst zu Färbfehlern kommt
                         gt.setFillColor("lime")
                         gt.fill()
                     for f in rochade_figure_place: # Färben der Felder für König und Turm bei einer Rochade
                         for t in f:
                             if type(t) is tuple:
                                 t_x, t_y, field_texture = t
-                                gt.setPos(t_x - 25, t_y) # -25, da es sonst zu Färbfehlern kommt
+                                gt.setPos(t_x - (25 * mX), t_y) # -25, da es sonst zu Färbfehlern kommt
                                 gt.setFillColor("purple")
                                 gt.fill()
                     for f in figure_hit_fields:
                         f_x, f_y, field_texture, f_number = f
-                        gt.setPos(f_x - 25, f_y) # -25, da es sonst zu Färbfehlern kommt
+                        gt.setPos(f_x - (25 * mX), f_y) # -25, da es sonst zu Färbfehlern kommt
                         gt.setFillColor("red")
                         gt.fill()
                         

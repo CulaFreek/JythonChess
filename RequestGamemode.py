@@ -4,8 +4,8 @@ import gpanel as gp
 def gamemodeDialog():
     gamemode = None
     
-    x = gp.getScreenWidth()
-    y = gp.getScreenHeight()
+    screenW = gp.getScreenWidth()
+    screenH = gp.getScreenHeight()
     
     fullscreen = CheckEntry("Fullscreen?", True)
     fullscreenEntryPane = EntryPane(fullscreen)
@@ -41,9 +41,13 @@ def gamemodeDialog():
                 gamemode = 2
             else:
                 close = False
-            if close and type(notFullscreenWidth.getValue()) is int and type(notFullscreenHeight.getValue()) is int:    
-                chooseGamemode.dispose()
-                x = notFullscreenWidth.getValue()
-                y = notFullscreenHeight.getValue()
+            if close and type(notFullscreenWidth.getValue()) is int and type(notFullscreenHeight.getValue()) is int:
+                if (notFullscreenWidth.getValue() >= 400 and notFullscreenWidth.getValue() <= x) and (notFullscreenHeight.getValue() >= 400 and notFullscreenHeight.getValue() <= y):
+                    chooseGamemode.dispose()
+                    x = notFullscreenWidth.getValue()
+                    y = notFullscreenHeight.getValue()
+                else:
+                    notFullscreenWidth.setValue(x)
+                    notFullscreenHeight.setValue(y)
     
-    return gamemode, x, y
+    return gamemode, screenW, screenH
