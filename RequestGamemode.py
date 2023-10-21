@@ -9,8 +9,8 @@ def gamemodeDialog():
     
     fullscreen = CheckEntry("Fullscreen?", True)
     fullscreenEntryPane = EntryPane(fullscreen)
-    notFullscreenWidth = IntEntry("Screenwidth :", x)
-    notFullscreenHeight = IntEntry("Screenheight :", y)
+    notFullscreenWidth = IntEntry("Screenwidth :", screenW)
+    notFullscreenHeight = IntEntry("Screenheight :", screenH)
     ScreenResolution = EntryPane("Screen resolution", notFullscreenWidth, notFullscreenHeight)
 
     oneDeviceRadio = RadioEntry("Play with a Friend on this Device")
@@ -26,8 +26,8 @@ def gamemodeDialog():
         if fullscreen.getValue():
             notFullscreenWidth.setEnabled(False)
             notFullscreenHeight.setEnabled(False)
-            notFullscreenWidth.setValue(x)
-            notFullscreenHeight.setValue(y)
+            notFullscreenWidth.setValue(screenW)
+            notFullscreenHeight.setValue(screenH)
         if not fullscreen.getValue():
             notFullscreenWidth.setEnabled(True)
             notFullscreenHeight.setEnabled(True)
@@ -42,12 +42,12 @@ def gamemodeDialog():
             else:
                 close = False
             if close and type(notFullscreenWidth.getValue()) is int and type(notFullscreenHeight.getValue()) is int:
-                if (notFullscreenWidth.getValue() >= 400 and notFullscreenWidth.getValue() <= x) and (notFullscreenHeight.getValue() >= 400 and notFullscreenHeight.getValue() <= y):
+                if (notFullscreenWidth.getValue() >= 400 and notFullscreenWidth.getValue() <= screenW) and (notFullscreenHeight.getValue() >= 400 and notFullscreenHeight.getValue() <= screenH):
                     chooseGamemode.dispose()
-                    x = notFullscreenWidth.getValue()
-                    y = notFullscreenHeight.getValue()
+                    screenW = notFullscreenWidth.getValue()
+                    screenH = notFullscreenHeight.getValue()
                 else:
-                    notFullscreenWidth.setValue(x)
-                    notFullscreenHeight.setValue(y)
+                    notFullscreenWidth.setValue(screenW)
+                    notFullscreenHeight.setValue(screenH)
     
     return gamemode, screenW, screenH
