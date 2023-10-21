@@ -1,8 +1,3 @@
-# Christian Tolger
-# 15.9.2023
-# v1.2
-# Full Comment Version
-
 import gturtle as gt
 import os
 import Gamemode
