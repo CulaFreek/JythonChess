@@ -5,7 +5,7 @@
 
 import gturtle as gt
 import os
-import Main
+import Gamemode
 import Values
 
 screenX = Values.screenW
