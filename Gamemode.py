@@ -1,12 +1,15 @@
 from gturtle import *
+import Values
+                
+if __name__ == "__main__":
     
-def start():
     import RequestGamemode as RG
 
-    choosenGamemode, x, y = RG.gamemodeDialog()
-        
+    choosenGamemode, screenW, screenH = RG.gamemodeDialog()
+
+    Values.choosenGamemode = choosenGamemode
+    Values.screenW = screenW
+    Values.screenH = screenH
+    
     if choosenGamemode == 0:
         import OneDeviceChess as ODC
-        
-if __name__ == "__main__":
-    start()
