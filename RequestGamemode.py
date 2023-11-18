@@ -7,10 +7,10 @@ def gamemodeDialog():
     screenW = gp.getScreenWidth()
     screenH = gp.getScreenHeight()
     
-    fullscreen = CheckEntry("Fullscreen?", True)
+    fullscreen = CheckEntry("Fullscreen?", False)
     fullscreenEntryPane = EntryPane(fullscreen)
-    notFullscreenWidth = IntEntry("Screenwidth :", screenW)
-    notFullscreenHeight = IntEntry("Screenheight :", screenH)
+    notFullscreenWidth = IntEntry("Screenwidth :", 800)
+    notFullscreenHeight = IntEntry("Screenheight :", 800)
     ScreenResolution = EntryPane("Screen resolution", notFullscreenWidth, notFullscreenHeight)
 
     oneDeviceRadio = RadioEntry("Play with a Friend on this Device")

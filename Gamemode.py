@@ -13,3 +13,5 @@ if __name__ == "__main__":
     
     if choosenGamemode == 0:
         import OneDeviceChess as ODC
+    if choosenGamemode == 1:
+        import OnlineChess as OC
