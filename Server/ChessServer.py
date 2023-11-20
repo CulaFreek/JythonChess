@@ -7,7 +7,7 @@ def handleClient(clientSocket):
     try:
         # Liste der offenen Gamerooms an den Client senden
         openGames = ', '.join(games.keys()) or "Keine offenen Games"
-        clientSocket.send("Verfügbare Games: {}".format(openGames))
+        clientSocket.send("Verfügbare Games: '{}'".format(openGames))
         # Game-Code vom Client erhalten
         gameCode = clientSocket.recv(1024)
 

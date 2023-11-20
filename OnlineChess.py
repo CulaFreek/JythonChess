@@ -41,7 +41,9 @@ sEPHit = []
 rochadeMoved = [False, False, False, False, False, False] # w_king, w_1_rock, w_2_rock, b_king, b_1_rock, b_2_rock | Falls bereits bewegt -> entsprechender Wert == True
 activePlayer = "white"
 activePlayerText = "Weiss"
-enemy = None
+enemy = "black"
+playerEnemy = None
+playerEnemyText = None
 inputAllowed = True
 onlineConnection = False
 clientSocket = None
@@ -74,13 +76,15 @@ def repaint(): # Neu zeichen des Schachfeldes nach einer Bewegung --->>> Einfach
     elapsedTime = gt.time.time() - gameStart
     timer = elapsedTime // 60
 
-    gt.setTitle("Aktiver Spieler : " + activePlayerText + "  |    " + str(moves) + "  :  Zuege insgesamt --- Spielzeit :  " + str(int(timer)) + " min") # Nur in Minuten, da Timer nicht fortlaufend, sondern nur bei Aktionen aktualisiert wird
+    gt.setTitle("Du bist " + yourColor + "  -  Aktiver Spieler : " + activePlayerText + "  |    " + str(moves) + "  :  Zuege insgesamt --- Spielzeit :  " + str(int(timer)) + " min") # Nur in Minuten, da Timer nicht fortlaufend, sondern nur bei Aktionen aktualisiert wird
 
 
 def startClient():
     global onlineConnection
     global clientSocket
-    global enemy
+    global playerEnemy
+    global playerEnemyText
+    global yourColor
     openGames = None
     while gt.time.time() - gameStart <= 15 and not onlineConnection:
         try:
@@ -108,24 +112,68 @@ def startClient():
                 receiveThread = threading.Thread(target = receiveMessages, args = (clientSocket,))
                 receiveThread.start()
                 
-                enemy = clientSocket.recv(1024)
+                playerEnemy = clientSocket.recv(1024)
+                if playerEnemy == "white":
+                    yourColor = "Schwarz"
+                    playerEnemyText = "Weiss"
+                else:
+                    yourColor = "Weiss"
+                    playerEnemyText = "Schwarz"
+                print("-----Du spielst " + yourColor + "-----\n-----!Weiss beginnt!-----")
                     
         except Exception as e:
             print(e)
 
 
 def receiveMessages(clientSocket):
+    global inputAllowed
     try:
         while True:
+            checkMate = False
+            stalemate = False
             data = clientSocket.recv(1024)
             if not data:
+                break
+            if data == "You Won":
+                gt.setTitle("SPIELENDE   |   " + yourColor + " hat das Spiel gewonnen") # Titel am Spielende aktualisieren
+                msgDlg(yourColor + " hat das Spiel gewonnen", title = "Schachmatt   |   " + yourColor + " gewinnt das Spiel")
+                inputAllowed = False
+                break
+            if data == "Draw":
+                gt.setTitle("SPIELENDE   |   Unentschieden") # Titel am Spielende aktualisieren
+                msgDlg("Unentschieden!", title = "Patt   |   Niemand gewinnt das Spiel")
+                inputAllowed = False
                 break
             stripedData = data[1:-1].split(',')
             sField, mField = int(stripedData[0]), int(stripedData[1])
             figureMove(sField, mField)
+            decolor() # Entfärben aller Felder sowie leeren der dazu gehörigen Listen
             playerChange()
             repaint()
-
+            if activePlayer != playerEnemy:
+                check = checkCheck() # Überprüfen, ob der König des aktuellen Spielers im Schach steht
+                if check: # Aufrufen der Schachmattfunktion nur, wenn ein König im Schach steht
+                    checkMate = checkCheckMate()
+                if not check:    
+                    stalemate = checkStalemate()
+                if checkMate:
+                    playerChange() # Wechseln des Gegners, da für seine Figuren die möglichen Züge ermittelt werden sollen, und seine Figuren die Figuren des aktiven Spielers schlagen könnten
+                    
+                    inputAllowed = False # Weiteren Input nach Spielende verhindern 
+                    gt.setTitle("SPIELENDE   |   " + playerEnemyText + " hat das Spiel gewonnen") # Titel am Spielende aktualisieren
+                    clientSocket.send("You Won")
+                    msgDlg(playerEnemyText + " hat das Spiel gewonnen!", title = "Schachmatt   |   " + playerEnemyText + " gewinnt das Spiel")
+                    break
+                    
+                if not checkMate and check:
+                    msgDlg("Du stehst im Schach \nSchuetze deinen Koenig!", title = "SCHACH") # Ausgabe 'Schach'
+                    
+                if stalemate:
+                    inputAllowed = False # Weiteren Input nach Spielende verhindern 
+                    gt.setTitle("SPIELENDE   |   Unentschieden") # Titel am Spielende aktualisieren
+                    clientSocket.send("Draw")
+                    msgDlg("Unentschieden!", title = "Patt   |   Niemand gewinnt das Spiel")
+                    break
 
     except Exception as e:
         print("Fehler beim Erhalten der Nachrichten: {}".format(e))
@@ -443,14 +491,12 @@ def figureMove(sourceIndex, moveToIndex, automatic = False, illegalMoveTest = Fa
         
     if not automatic and not illegalMoveTest: # Bei automatischem Programmdurchlauf würden im folgendem weitere automatische Programmdurchläufe entstehen
         moves += 1  
-        
-        repaint() # Repainten des Schachfeldes, da sich die Figuren Grafisch bisher noch nicht bewegt haben
         return sourceIndex
     
     if automatic:
         return sourceField, sourceIndex, moveToField, moveToIndex # Beim Automatischen durchlaufen die Ursprungsfelder zurückgeben, damit diese nach der automatischen Figurbewegung sich nicht ändern
 
-def decolor(): # Funktion zum Entfärben der gedfärbten Felder
+def decolor(notMoved = False): # Funktion zum Entfärben der gedfärbten Felder
     global lastPossibleFields
     global rochadeFigurePlace
     global possibleHitFields
@@ -461,7 +507,8 @@ def decolor(): # Funktion zum Entfärben der gedfärbten Felder
     possibleHitFields = []
     selectedField = []    
     
-    repaint() # Repainten, um alle Färbungen zu entfernen
+    if notMoved:
+        repaint() # Repainten, um alle Färbungen zu entfernen
 
 
 def checkCheck(): # Funktion zum Überprüfen ob der König im Schach steht
@@ -532,11 +579,12 @@ def playerChange(): # Funktion zum wechseln der Spieler
     if activePlayer == "white":
         activePlayer = "black"
         activePlayerText = "Schwarz"
+        enemy = "white"
 
     else:
         activePlayer = "white"
         activePlayerText = "Weiss"
-
+        enemy = "black"
 
 
 def kingGetter(): # Funktion zum Ermitteln der Positionen der Könige
@@ -578,10 +626,8 @@ def figureSelect(x, y): # Funktion die auf Aufruf des obigen Mauscallbacks aufgr
     global rochadeFigurePlace
     global chessField
     
-    checkMate = False
-    stalemate = False
     index = 0
-    if inputAllowed and enemy != activePlayer: # Solange True, bis ein König fällt
+    if inputAllowed and playerEnemy != activePlayer: # Solange True, bis ein König fällt
         for largeTuple in chessField: # Durchgehen jedes Feldes bis ein Feld mit den angeklickten Koordianten übereinstimmt, auf diesem werden dann die weiteren Schritte ausgeführt
             moved = False
             fieldKey, fieldNumber, figure, figureTexture, leftX, yAbove, rightX, yDown, centerX, centerY, fieldTexture, figureColor, collum, row = largeTuple # Entpacken des Schachfeld Tupels
@@ -592,35 +638,12 @@ def figureSelect(x, y): # Funktion die auf Aufruf des obigen Mauscallbacks aufgr
                         if centerX == possibleField[0] and centerY == possibleField[1]: # Falls die Center mit den Centern des aktuellen Feldes übereinstimmen 
                             moved = True
                             clientSocket.send((selectedField[1], index)) # Übergibt an die Move Funktion das augewählte Figurenfeld, sowie das Feld, auf welches sich die Figur bewegen soll
-                            decolor() # Entfärben aller Felder sowie leeren der dazu gehörigen Listen
-                        
-                            check = checkCheck() # Überprüfen, ob der König des aktuellen Spielers im Schach steht
-                            if check: # Aufrufen der Schachmattfunktion nur, wenn ein König im Schach steht
-                                checkMate = checkCheckMate()
-                            if not check:    
-                                stalemate = checkStalemate()
-                            
-                            if checkMate:
-                                playerChange() # Wechseln des Gegners, da für seine Figuren die möglichen Züge ermittelt werden sollen, und seine Figuren die Figuren des aktiven Spielers schlagen könnten
-                                
-                                inputAllowed = False # Weiteren Input nach Spielende verhindern 
-                                gt.setTitle("SPIELENDE   |   " + activePlayerText + " hat das Spiel gewonnen") # Titel am Spielende aktualisieren
-                                msgDlg(activePlayerText + " hat das Spiel gewonnen!", title = "Schachmatt   |   " + activePlayerText + " gewinnt das Spiel")
-                                
-                            if not checkMate and check:
-                                msgDlg(activePlayerText + ", du stehst im Schach \nSchuetze deinen Koenig!", title = "SCHACH") # Ausgabe 'Schach'
-                                
-                            if stalemate:
-                                inputAllowed = False # Weiteren Input nach Spielende verhindern 
-                                gt.setTitle("SPIELENDE   |   Unentschieden") # Titel am Spielende aktualisieren
-                                msgDlg("Unentschieden!", title = "Patt   |   Niemand gewinnt das Spiel")
-                                
                             selectedField = []
                             break
                 if moved:
                     break # Keine Andere Möglichkeit gefunden | Schleife muss im if Fall sofort abgebrochen werden, da es sonst zu verherenden Fehlern kommen kann
                 if figure != "" and figureColor == activePlayer: # Falls das angeklickte Feld nicht leer und die Figurenfarbe mit dem aktiven Spieler übereinstimmt
-                    decolor()
+                    decolor(True)
                     selectedField.append((centerX, centerY, fieldTexture, figure, fieldNumber, collum, row))# Nach leeren und entfärben wird hier die neu ausgewählte Figur aufgenommen
                     selectedField.append(index) # Speichern des Indexes des ausgewählten Feldes | Wichtig für die move Funktion
                     gt.setPos(centerX - (25 * mScreenW) , centerY)
@@ -629,19 +652,19 @@ def figureSelect(x, y): # Funktion die auf Aufruf des obigen Mauscallbacks aufgr
                     
                     lastPossibleFields, possibleHitFields = checkFigureType(figure) # Funktionsaufrufe je nach ausgewählter Figur
                     newPossibleMoves = []
-                    for largeTuple in lastPossibleFields: # Für jedes possible Field wird geguckt, ob der Zug legal wäre, wenn nicht wird das Feld nicht zur neuen Liste hinzugefügt, die die Alte dann ersetzt
+                    for lTuple in lastPossibleFields: # Für jedes possible Field wird geguckt, ob der Zug legal wäre, wenn nicht wird das Feld nicht zur neuen Liste hinzugefügt, die die Alte dann ersetzt
                         selectedCopy = [] + selectedField # Copy von selectedField, da dieses sich ändert und sonst nichts mehr funktioniert
                         figureHitCopy = [] + possibleHitFields
                         rochadeCopy = [] + rochadeFigurePlace
                         
-                        check = figureMove(selectedField[1], largeTuple[3] - 1, False, True) # Hier wird die legalität des möglichen Zuges überprüft
+                        check = figureMove(selectedField[1], lTuple[3] - 1, False, True) # Hier wird die legalität des möglichen Zuges überprüft
                         
                         selectedField = [] + selectedCopy # selectedField mit der erzeugten Kopie überschreiben
                         possibleHitFields = [] + figureHitCopy
                         rochadeFigurePlace = [] + rochadeCopy
                         
                         if not check: # Falls der mögliche Zug nicht illegal ist, wird er zu den neuen möglichen Zügen hinzugefügt
-                            newPossibleMoves.append(largeTuple)
+                            newPossibleMoves.append(lTuple)
                     lastPossibleFields = [] + newPossibleMoves # Überschreiben der Liste mit dedn möglichen Feldern, mit den möglichen legalen Feldern
                     
                     newHitFields = []
