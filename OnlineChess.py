@@ -7,6 +7,9 @@ import threading
 import Gamemode
 import Values
 
+if __name__ == "__main__":
+    sys.exit("Starte Gamemode.py, um das Spiel zu starten")
+
 screenW = Values.screenW
 screenH = Values.screenH
 
@@ -44,8 +47,8 @@ activePlayerText = "Weiss"
 enemy = "black"
 playerEnemy = None
 playerEnemyText = None
-inputAllowed = True
 onlineConnection = False
+inputAllowed = True
 clientSocket = None
 moves = 0
 
@@ -71,7 +74,8 @@ def repaint(): # Neu zeichen des Schachfeldes nach einer Bewegung --->>> Einfach
         gt.fill()
         
         figureTexture = largeTupel[3]
-        gt.drawImage(figureTexture) # Textur der Schachfigur aufs Spielfeld bringen
+        if figureTexture != "":
+            gt.drawImage(figureTexture) # Textur der Schachfigur aufs Spielfeld bringen
     
     elapsedTime = gt.time.time() - gameStart
     timer = elapsedTime // 60
@@ -79,40 +83,36 @@ def repaint(): # Neu zeichen des Schachfeldes nach einer Bewegung --->>> Einfach
     gt.setTitle("Du bist " + yourColor + "  -  Aktiver Spieler : " + activePlayerText + "  |    " + str(moves) + "  :  Zuege insgesamt --- Spielzeit :  " + str(int(timer)) + " min") # Nur in Minuten, da Timer nicht fortlaufend, sondern nur bei Aktionen aktualisiert wird
 
 
-def startClient():
-    global onlineConnection
+def startClient(): # Funktion zum Starten des Clients / verbinden mit dem Server
     global clientSocket
     global playerEnemy
     global playerEnemyText
     global yourColor
+    global onlineConnection
+    
     openGames = None
-    while gt.time.time() - gameStart <= 15 and not onlineConnection:
-        try:
+    while gt.time.time() - gameStart <= 10 and not onlineConnection: # Falls innerhalb von 10 Sekunden keine Verbindung hergestellt werden kann wird das Programm mit einem SystemExit beendet 
+        try: # Falls keine Verbindung mit dem Server zustande kommt -> Fehler abfangen, Programm durch Sysexit beenden mit entsprechender Nachricht
             clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            clientSocket.connect(('localhost', 8888))
-            openGames = clientSocket.recv(1024)
+            clientSocket.connect(('localhost', 8888)) # Verbinden mit dem Server, falls möglich
+            openGames = clientSocket.recv(1024) # Erhalten der offenen Spielelobby-Codes, damit dem Nutzer bekannt ist, welche Spielräume offen sind
             if openGames != None:
-                onlineConnection = True           
-            
-            if gt.time.time() - gameStart <= 15 and not onlineConnection:
-                sys.exit("Es konnte keine Verbindung zum Server hergestellt werden.")     
-            else:
-                print("Willkommen! Bitte gib einen Game-Code ein oder erstelle einen neuen.")
-                # Liste der offenen Games empfangen
-                print(openGames)
-        
-                # Game-Code vom Benutzer erhalten
-                gameCode = str(input("Gib einen Game-Code ein: "))
+                onlineConnection = True
+                
+            if gt.time.time() - gameStart <= 10 and not onlineConnection:
+                sys.exit("Es konnte keine Verbindung zum Server hergestellt werden.") # Mitteilung, dass kein Verbindungsaufbau möglich ist  
+            else:      
+                print("Willkommen! Bitte gib einen Game-Code ein oder erstelle einen neuen.\n" + openGames)
+                gameCode = str(input("Gib einen Game-Code ein: ")) # Eingabe des Lobbycodes, des Spiels, dem man beitreten möchte
                 clientSocket.send(gameCode)
                 
-                gameCreationSuccess = clientSocket.recv(1024)
+                gameCreationSuccess = clientSocket.recv(1024) # Auf Bestätigung des Servers warten
                 print(gameCreationSuccess)
         
-                # Nachrichtenempfangsthread starten
                 receiveThread = threading.Thread(target = receiveMessages, args = (clientSocket,))
-                receiveThread.start()
+                receiveThread.start() # Nachrichtenempfangs-Thread starten
                 
-                playerEnemy = clientSocket.recv(1024)
+                playerEnemy = clientSocket.recv(1024) # Gegner-Farbe empfangen 
                 if playerEnemy == "white":
                     yourColor = "Schwarz"
                     playerEnemyText = "Weiss"
@@ -125,28 +125,28 @@ def startClient():
             print(e)
 
 
-def receiveMessages(clientSocket):
+def receiveMessages(clientSocket): # Funktion zum Empfangen von Zügen, sowie dem Spielende 
     global inputAllowed
     try:
-        while True:
+        while True: # Muss durchgängig laufen, da zu jedem Zeitpunkt Bewegungen empfangen werden müssen
             checkMate = False
             stalemate = False
-            data = clientSocket.recv(1024)
-            if not data:
+            data = clientSocket.recv(1024) # Empfangen der Nachricht
+            if not data: # Falls kein Zug gemacht wurde ist der Inhalt der Nachricht 'None'. Nur nicht 'None'-Nachrichten weiter verarbeiten, sonst Fehlermeldung 
                 break
-            if data == "You Won":
+            if data == "You Won": # Nachricht, die Erhalten wird, wenn der Gegner verliert
                 gt.setTitle("SPIELENDE   |   " + yourColor + " hat das Spiel gewonnen") # Titel am Spielende aktualisieren
-                msgDlg(yourColor + " hat das Spiel gewonnen", title = "Schachmatt   |   " + yourColor + " gewinnt das Spiel")
+                msgDlg(yourColor + " hat das Spiel gewonnen!", title = "Schachmatt   |   " + yourColor + " gewinnt das Spiel")
                 inputAllowed = False
                 break
-            if data == "Draw":
+            if data == "Draw": # Nachricht, die Erhalten wird, wenn es zu einem Unentschieden kommt
                 gt.setTitle("SPIELENDE   |   Unentschieden") # Titel am Spielende aktualisieren
                 msgDlg("Unentschieden!", title = "Patt   |   Niemand gewinnt das Spiel")
                 inputAllowed = False
                 break
-            stripedData = data[1:-1].split(',')
+            stripedData = data[1:-1].split(',') # Nachrichtenformat: (x, y) !Kein Tupel Format: Unicode! Nachricht entprechend nach x und y teilen
             sField, mField = int(stripedData[0]), int(stripedData[1])
-            figureMove(sField, mField)
+            figureMove(sField, mField) # Erhaltene Bewegung umsetzen
             decolor() # Entfärben aller Felder sowie leeren der dazu gehörigen Listen
             playerChange()
             repaint()
@@ -637,7 +637,7 @@ def figureSelect(x, y): # Funktion die auf Aufruf des obigen Mauscallbacks aufgr
                     for possibleField in lastPossibleFields: 
                         if centerX == possibleField[0] and centerY == possibleField[1]: # Falls die Center mit den Centern des aktuellen Feldes übereinstimmen 
                             moved = True
-                            clientSocket.send((selectedField[1], index)) # Übergibt an die Move Funktion das augewählte Figurenfeld, sowie das Feld, auf welches sich die Figur bewegen soll
+                            clientSocket.send((selectedField[1], index)) # Senden der Bewegung an den Server, damit beide Clients ihre Spielfelder updaten
                             selectedField = []
                             break
                 if moved:

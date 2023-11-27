@@ -1,7 +1,11 @@
 import gturtle as gt
 import os
+import sys
 import Gamemode
 import Values
+
+if __name__ == "__main__":
+    sys.exit("Starte Gamemode.py, um das Spiel zu starten")
 
 screenW = Values.screenW
 screenH = Values.screenH
@@ -63,7 +67,8 @@ def repaint(): # Neu zeichen des Schachfeldes nach einer Bewegung --->>> Einfach
         gt.fill()
         
         figureTexture = largeTupel[3]
-        gt.drawImage(figureTexture) # Textur der Schachfigur aufs Spielfeld bringen
+        if figureTexture != "":
+            gt.drawImage(figureTexture) # Textur der Schachfigur aufs Spielfeld bringen
     
     elapsedTime = gt.time.time() - gameStart
     timer = elapsedTime // 60

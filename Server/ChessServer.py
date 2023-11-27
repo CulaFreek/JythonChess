@@ -1,38 +1,38 @@
 import socket
 import threading
+import random
 
 games = {}
 
 def handleClient(clientSocket):
     try:
-        # Liste der offenen Gamerooms an den Client senden
-        openGames = ', '.join(games.keys()) or "Keine offenen Games"
+        openGames = ', '.join(games.keys()) or "Keine offenen Games" # Liste der offenen Gamerooms an den Client senden
         clientSocket.send("Verfügbare Games: '{}'".format(openGames))
-        # Game-Code vom Client erhalten
-        gameCode = clientSocket.recv(1024)
-
-        # Überprüfen, ob das Game bereits existiert oder erstellt werden muss
-        if gameCode not in games:
-            # Neues Game erstellen
-            games[gameCode] = [clientSocket]
+        gameCode = clientSocket.recv(1024) # Auf Beitrittsentscheidung des Clients warten
+        
+        if gameCode not in games: # Überprüfen, ob das Game bereits existiert oder erstellt werden muss
+            games[gameCode] = [clientSocket] # Falls das Spiel nicht existiert neues erstellen
             clientSocket.send("Game {} erstellt. Warte auf weitere Mitglieder...".format(gameCode))
             print("Game {} erstellt.".format(gameCode))
         else:
-            # Bestehendem Game beitreten
-            if len(games[gameCode]) >= 2:
+            if len(games[gameCode]) >= 2: # Bestehendem Game beitreten
                 clientSocket.send("Das Game {} ist voll! Bitte erstelle ein neus Game oder joine einem anderem".format(gameCode))
             else:
                 games[gameCode].append(clientSocket)
                 clientSocket.send("Du bist dem Game {} beigetreten.".format(gameCode))
 
-            # Warte auf den zweiten Client, bevor Nachrichten gesendet werden können
-            while len(games[gameCode]) < 2:
+            while len(games[gameCode]) < 2: # Auf Beitritt des 2.ten Spielers warten
                 clientSocket.send("Warte auf weiteren Spieler...")
             
-            member = games[gameCode]
-            member[0].send("black")
-            # Gegner an Member senden
-            clientSocket.send("white")
+            randomNumber = random.randint(0,1) # Farbenzufallsgenerator, damit der Spieler, der sich als erstes verbindet nicht zwangsweise Weiß spielt
+            if randomNumber == 0:
+                member = games[gameCode]
+                member[0].send("black")
+                clientSocket.send("white")
+            else:
+                member = games[gameCode]
+                member[0].send("white")
+                clientSocket.send("black")
 
         while True:
             data = clientSocket.recv(1024)
@@ -44,20 +44,17 @@ def handleClient(clientSocket):
 
     except Exception as e:
         print("Fehler beim Umgang mit Client: {}".format(e))
-    finally:
-        # Client aus dem Game entfernen
+    finally: # Client aus dem Game entfernen wenn ein Fehler vorliegt
         for code, members in games.items():
             if clientSocket in members:
                 members.remove(clientSocket)
                 if not members:
-                    # Lösche das Game, wenn keine Mitglieder mehr vorhanden sind
                     del games[code]
                 break
         clientSocket.close()
 
 def broadcast(message, members, senderSocket):
-    # Sende die Nachricht an alle Mitglieder des Games
-    for memberSocket in members:
+    for memberSocket in members: # Sende die Nachricht an alle Mitglieder des Games
         try:
             memberSocket.send(message)
         except Exception as e:

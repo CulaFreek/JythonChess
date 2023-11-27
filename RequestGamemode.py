@@ -1,5 +1,9 @@
 from gturtle import *
 import gpanel as gp
+import sys
+
+if __name__ == "__main__":
+    sys.exit("Starte Gamemode.py, um das Spiel zu starten")
 
 def gamemodeDialog():
     gamemode = None
@@ -47,7 +51,10 @@ def gamemodeDialog():
                     screenW = notFullscreenWidth.getValue()
                     screenH = notFullscreenHeight.getValue()
                 else:
-                    notFullscreenWidth.setValue(screenW)
-                    notFullscreenHeight.setValue(screenH)
+                    notFullscreenWidth.setValue(800)
+                    notFullscreenHeight.setValue(800)
+            else:
+                notFullscreenWidth.setValue(800)
+                notFullscreenHeight.setValue(800)
     
     return gamemode, screenW, screenH
