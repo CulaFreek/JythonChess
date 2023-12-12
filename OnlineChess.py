@@ -81,7 +81,7 @@ def repaint(): # Neu zeichen des Schachfeldes nach einer Bewegung --->>> Einfach
     timer = elapsedTime // 60
 
     gt.setTitle("Du bist " + yourColor + "  -  Aktiver Spieler : " + activePlayerText + "  |    " + str(moves) + "  :  Zuege insgesamt --- Spielzeit :  " + str(int(timer)) + " min") # Nur in Minuten, da Timer nicht fortlaufend, sondern nur bei Aktionen aktualisiert wird
-
+    gt.repaint()
 
 def startClient(): # Funktion zum Starten des Clients / verbinden mit dem Server
     global clientSocket
@@ -187,6 +187,7 @@ gt.makeTurtle()
 gt.hideTurtle() # Zeichengeschwindigkeit auf instant speeed setzen und Turtle verstecken
 gt.setPenColor("black")
 gt.setPenWidth(3)
+gt.enableRepaint(False)
     
 repaint() # Erstes Zeichnen des Spielfeldes
  
