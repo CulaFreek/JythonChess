@@ -5,6 +5,7 @@ import sys
 if __name__ == "__main__":
     sys.exit("Starte Gamemode.py, um das Spiel zu starten")
 
+
 def gamemodeDialog():
     gamemode = None
     
@@ -46,7 +47,7 @@ def gamemodeDialog():
             else:
                 close = False
             if close and type(notFullscreenWidth.getValue()) is int and type(notFullscreenHeight.getValue()) is int:
-                if (notFullscreenWidth.getValue() >= 400 and notFullscreenWidth.getValue() <= screenW) and (notFullscreenHeight.getValue() >= 400 and notFullscreenHeight.getValue() <= screenH):
+                if (400 <= notFullscreenWidth.getValue() <= screenW) and (400 <= notFullscreenHeight.getValue() <= screenH):
                     chooseGamemode.dispose()
                     screenW = notFullscreenWidth.getValue()
                     screenH = notFullscreenHeight.getValue()

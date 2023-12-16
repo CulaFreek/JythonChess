@@ -5,13 +5,13 @@ if __name__ == "__main__":
     
     import RequestGamemode as RG
 
-    choosenGamemode, screenW, screenH = RG.gamemodeDialog()
+    chosenGamemode, screenW, screenH = RG.gamemodeDialog()
 
-    Values.choosenGamemode = choosenGamemode
+    Values.chosenGamemode = chosenGamemode
     Values.screenW = screenW
     Values.screenH = screenH
     
-    if choosenGamemode == 0:
+    if chosenGamemode == 0:
         import OneDeviceChess as ODC
-    if choosenGamemode == 1:
+    if chosenGamemode == 1:
         import OnlineChess as OC
