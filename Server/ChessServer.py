@@ -14,14 +14,14 @@ def handleClient(clientSocket):
         
         if gameCode not in games:  # Überprüfen, ob das Game bereits existiert oder erstellt werden muss
             games[gameCode] = [clientSocket]  # Falls das Spiel nicht existiert neues erstellen
-            clientSocket.send("Game {} erstellt. Warte auf weitere Mitglieder...".format(gameCode))
-            print("Game {} erstellt.".format(gameCode))
+            clientSocket.send("Game {} erstellt \nWarte auf weitere Mitglieder...".format(gameCode))
+            print("Game {} erstellt".format(gameCode))
         else:
             if len(games[gameCode]) >= 2:  # Bestehendem Game beitreten
                 clientSocket.send("Das Game {} ist voll! Bitte erstelle ein neues Game oder joine einem anderem".format(gameCode))
             else:
                 games[gameCode].append(clientSocket)
-                clientSocket.send("Du bist dem Game {} beigetreten.".format(gameCode))
+                clientSocket.send("Du bist dem Game {} beigetreten".format(gameCode))
 
             while len(games[gameCode]) < 2:  # Auf Beitritt des 2.ten Spielers warten
                 clientSocket.send("Warte auf weiteren Spieler...")
@@ -50,6 +50,7 @@ def handleClient(clientSocket):
             if clientSocket in members:
                 members.remove(clientSocket)
                 if not members:
+                    print("Game", code, "geschlossen")
                     del games[code]
                 break
         clientSocket.close()

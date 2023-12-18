@@ -50,6 +50,7 @@ playerEnemyText = None
 onlineConnection = False
 inputAllowed = True
 clientSocket = None
+quitGame = False
 moves = 0
 
 
@@ -91,8 +92,7 @@ def startClient():  # Funktion zum Starten des Clients / verbinden mit dem Serve
     global playerEnemyText
     global yourColor
     global onlineConnection
-    
-    openGames = None
+
     while gt.time.time() - gameStart <= 10 and not onlineConnection:  # Falls innerhalb von 10 Sekunden keine Verbindung hergestellt werden kann wird das Programm mit einem SystemExit beendet
         try:  # Falls keine Verbindung mit dem Server zustande kommt: Fehler abfangen, Programm durch Sys-exit beenden mit entsprechender Nachricht
             clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -102,9 +102,9 @@ def startClient():  # Funktion zum Starten des Clients / verbinden mit dem Serve
                 onlineConnection = True
                 
             if gt.time.time() - gameStart <= 10 and not onlineConnection:
-                sys.exit("Es konnte keine Verbindung zum Server hergestellt werden.")  # Mitteilung, dass kein Verbindungsaufbau möglich ist
+                sys.exit("Es konnte keine Verbindung zum Server hergestellt werden")  # Mitteilung, dass kein Verbindungsaufbau möglich ist
             else:      
-                print("Willkommen! Bitte gib einen Game-Code ein oder erstelle einen neuen.\n" + openGames)
+                print("Willkommen! Bitte gib einen Game-Code ein oder erstelle einen neuen \n" + openGames)
                 gameCode = str(input("Gib einen Game-Code ein: "))  # Eingabe des Lobbycodes, des Spiels, dem man beitreten möchte
                 clientSocket.send(gameCode)
                 
@@ -121,7 +121,7 @@ def startClient():  # Funktion zum Starten des Clients / verbinden mit dem Serve
                 else:
                     yourColor = "Weiss"
                     playerEnemyText = "Schwarz"
-                print("-----Du spielst " + yourColor + "-----\n-----!Weiss beginnt!-----")
+                print("\n -----Du spielst " + yourColor + "-----\n")
                     
         except Exception as e:
             print(e)
@@ -129,6 +129,8 @@ def startClient():  # Funktion zum Starten des Clients / verbinden mit dem Serve
 
 def receiveMessages(clientSocket):  # Funktion zum Empfangen von Zügen, sowie dem Spielende
     global inputAllowed
+    global quitGame
+
     try:
         while True:  # Muss durchgängig laufen, da zu jedem Zeitpunkt Bewegungen empfangen werden müssen
             checkMate = False
@@ -136,16 +138,31 @@ def receiveMessages(clientSocket):  # Funktion zum Empfangen von Zügen, sowie d
             data = clientSocket.recv(1024)  # Empfangen der Nachricht
             if not data:  # Falls kein Zug gemacht wurde, ist der Inhalt der Nachricht 'None'. Nur nicht 'None'-Nachrichten weiter verarbeiten, sonst Fehlermeldung
                 break
+            
+            if data == "Mitspieler left game":  # Falls der Mitspieler das Spiel verlässt
+                if not quitGame:
+                    quitGame = askYesNo("Dein Mitspieler hat das Spiel verlassen! \nMöchtest du das Spiel schließen - ein Reconnect ist nicht möglich, zum spielen Programm neustarten!")
+                if quitGame:
+                    print("Spiel verlassen")
+                    gt.dispose()
+                    clientSocket.close()
+                    sys.exit("Spiel geschlossen!")
+                else:
+                    quitGame = True
+                    break
+
             if data == "You Won":  # Nachricht, die Erhalten wird, wenn der Gegner verliert
                 gt.setTitle("SPIELENDE   |   " + yourColor + " hat das Spiel gewonnen")  # Titel am Spielende aktualisieren
                 msgDlg(yourColor + " hat das Spiel gewonnen!", title="Schachmatt   |   " + yourColor + " gewinnt das Spiel")
                 inputAllowed = False
                 break
+            
             if data == "Draw":  # Nachricht, die Erhalten wird, wenn es zu einem Unentschieden kommt
                 gt.setTitle("SPIELENDE   |   Unentschieden")  # Titel am Spielende aktualisieren
                 msgDlg("Unentschieden!", title="Patt   |   Niemand gewinnt das Spiel")
                 inputAllowed = False
                 break
+            
             stripedData = data[1:-1].split(',')  # Nachrichtenformat: (x, y) ! Kein Tupel Format: Unicode! Nachricht entsprechend nach x und y teilen
             sField, mField = int(stripedData[0]), int(stripedData[1])
             figureMove(sField, mField)  # Erhaltene Bewegung umsetzen
@@ -185,7 +202,7 @@ gameStart = gt.time.time()  # Zeit des Spielstarts speichern
 startClient()        
                         
 gt.setPlaygroundSize(int(800 * mScreenW), int(800 * mScreenH))  # Feste Fenstergröße, in die das Schachfeld perfekt hinein passt
-gt.makeTurtle()
+gt.makeTurtle(closeClicked=gt.onCloseClicked)
 gt.hideTurtle()  # Zeichengeschwindigkeit auf instant speeed setzen und Turtle verstecken
 gt.setPenColor("black")
 gt.setPenWidth(3)
@@ -193,7 +210,23 @@ gt.enableRepaint(False)
     
 repaint()  # Erstes Zeichnen des Spielfeldes
  
-# Programmende! Ab hier reagiert das Programm nur noch auf MausCallBacks           
+# Programmende! Ab hier reagiert das Programm nur noch auf MausCallBacks  
+
+
+@gt.onCloseClicked
+def close():  # Funktion zum Schließen des Client-Sockets, damit die Spiele-lobbys richtig geschlossen werden
+    global quitGame
+    
+    if quitGame:
+        close = askYesNo("Möchtest du das Spiel wirklich verlassen? \nDein Mitspieler hat das Spiel bereits verlassen!")
+        if close:
+            print("Spiel verlassen")
+            gt.dispose()
+    else:
+        close = askYesNo("Möchtest du das Spiel wirklich verlassen?")
+        if close:
+            quitGame = True
+            clientSocket.send("Mitspieler left game")
 
 
 def possiblePawnMoves():  # Funktion die alle möglichen Bewegungen für den ausgewählten Bauern zurückgibt
