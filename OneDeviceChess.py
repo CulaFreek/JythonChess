@@ -20,14 +20,14 @@ dirLocation = os.path.join(fileDir, chessFigures)  # Anfügen des Ordnernamen an
 # Schachfeld
                 #   0           1          2          3          4       5      6       7       8        9         10            11         12     13
 chessField = [  # fieldKey, fieldNumber, figure, figureTexture, leftX, yAbove, rightX, yDown, centerX, centerY, fieldTexture, figureColor, colum, row
-    ("8a", 1, "black_1_rock", dirLocation + "chessblack_2.png", -400 * mScreenW, 400 * mScreenH, -300 * mScreenW, 300 * mScreenH, -350 * mScreenW, 350 * mScreenH, "white", "black", 1, 1), ("8b", 2, "black_knight", dirLocation + "chessblack_3.png", -300 * mScreenW, 400 * mScreenH, -200 * mScreenW, 300 * mScreenH, -250 * mScreenW, 350 * mScreenH, "gray", "black", 1, 2), ("8c", 3, "black_bishop", dirLocation + "chessblack_4.png", -200 * mScreenW, 400 * mScreenH, -100 * mScreenW, 300 * mScreenH, -150 * mScreenW, 350 * mScreenH, "white", "black", 1, 3), ("8d", 4, "black_queen", dirLocation + "chessblack_1.png", -100 * mScreenW, 400 * mScreenH, 0 * mScreenW, 300 * mScreenH, -50 * mScreenW, 350 * mScreenH, "gray", "black", 1, 4), ("8e", 5, "black_king", dirLocation + "chessblack_0.png", 0 * mScreenW, 400 * mScreenH, 100 * mScreenW, 300 * mScreenH, 50 * mScreenW, 350 * mScreenH, "white", "black", 1, 5), ("8f", 6, "black_bishop", dirLocation + "chessblack_4.png", 100 * mScreenW, 400 * mScreenH, 200 * mScreenW, 300 * mScreenH, 150 * mScreenW, 350 * mScreenH, "gray", "black", 1, 6), ("8g", 7, "black_knight", dirLocation + "chessblack_3.png", 200 * mScreenW, 400 * mScreenH, 300 * mScreenW, 300 * mScreenH, 250 * mScreenW, 350 * mScreenH, "white", "black", 1, 7), ("8h", 8, "black_2_rock", dirLocation + "chessblack_2.png", 300 * mScreenW, 400 * mScreenH, 400 * mScreenW, 300 * mScreenH, 350 * mScreenW, 350 * mScreenH, "gray", "black", 1, 8),
+    ("8a", 1, "black_1_rook", dirLocation + "chessblack_2.png", -400 * mScreenW, 400 * mScreenH, -300 * mScreenW, 300 * mScreenH, -350 * mScreenW, 350 * mScreenH, "white", "black", 1, 1), ("8b", 2, "black_knight", dirLocation + "chessblack_3.png", -300 * mScreenW, 400 * mScreenH, -200 * mScreenW, 300 * mScreenH, -250 * mScreenW, 350 * mScreenH, "gray", "black", 1, 2), ("8c", 3, "black_bishop", dirLocation + "chessblack_4.png", -200 * mScreenW, 400 * mScreenH, -100 * mScreenW, 300 * mScreenH, -150 * mScreenW, 350 * mScreenH, "white", "black", 1, 3), ("8d", 4, "black_queen", dirLocation + "chessblack_1.png", -100 * mScreenW, 400 * mScreenH, 0 * mScreenW, 300 * mScreenH, -50 * mScreenW, 350 * mScreenH, "gray", "black", 1, 4), ("8e", 5, "black_king", dirLocation + "chessblack_0.png", 0 * mScreenW, 400 * mScreenH, 100 * mScreenW, 300 * mScreenH, 50 * mScreenW, 350 * mScreenH, "white", "black", 1, 5), ("8f", 6, "black_bishop", dirLocation + "chessblack_4.png", 100 * mScreenW, 400 * mScreenH, 200 * mScreenW, 300 * mScreenH, 150 * mScreenW, 350 * mScreenH, "gray", "black", 1, 6), ("8g", 7, "black_knight", dirLocation + "chessblack_3.png", 200 * mScreenW, 400 * mScreenH, 300 * mScreenW, 300 * mScreenH, 250 * mScreenW, 350 * mScreenH, "white", "black", 1, 7), ("8h", 8, "black_2_rook", dirLocation + "chessblack_2.png", 300 * mScreenW, 400 * mScreenH, 400 * mScreenW, 300 * mScreenH, 350 * mScreenW, 350 * mScreenH, "gray", "black", 1, 8),
     ("7a", 9, "black_pawn", dirLocation + "chessblack_5.png", -400 * mScreenW, 300 * mScreenH, -300 * mScreenW, 200 * mScreenH, -350 * mScreenW, 250 * mScreenH, "gray", "black", 2, 1), ("7b", 10, "black_pawn", dirLocation + "chessblack_5.png", -300 * mScreenW, 300 * mScreenH, -200 * mScreenW, 200 * mScreenH, -250 * mScreenW, 250 * mScreenH, "white", "black", 2, 2), ("7c", 11, "black_pawn", dirLocation + "chessblack_5.png", -200 * mScreenW, 300 * mScreenH, -100 * mScreenW, 200 * mScreenH, -150 * mScreenW, 250 * mScreenH, "gray", "black", 2, 3), ("7d", 12, "black_pawn", dirLocation + "chessblack_5.png", -100 * mScreenW, 300 * mScreenH, 0 * mScreenW, 200 * mScreenH, -50 * mScreenW, 250 * mScreenH, "white", "black", 2, 4), ("7e", 13, "black_pawn", dirLocation + "chessblack_5.png", 0 * mScreenW, 300 * mScreenH, 100 * mScreenW, 200 * mScreenH, 50 * mScreenW, 250 * mScreenH, "gray", "black", 2, 5), ("7f", 14, "black_pawn", dirLocation + "chessblack_5.png", 100 * mScreenW, 300 * mScreenH, 200 * mScreenW, 200 * mScreenH, 150 * mScreenW, 250 * mScreenH, "white", "black", 2, 6), ("7g", 15, "black_pawn", dirLocation + "chessblack_5.png", 200 * mScreenW, 300 * mScreenH, 300 * mScreenW, 200 * mScreenH, 250 * mScreenW, 250 * mScreenH, "gray", "black", 2, 7), ("7h", 16, "black_pawn", dirLocation + "chessblack_5.png", 300 * mScreenW, 300 * mScreenH, 400 * mScreenW, 200 * mScreenH, 350 * mScreenW, 250 * mScreenH, "white", "black", 2, 8),
     ("6a", 17, "", "", -400 * mScreenW, 200 * mScreenH, -300 * mScreenW, 100 * mScreenH, -350 * mScreenW, 150 * mScreenH, "white", "", 3, 1), ("6b", 18, "", "", -300 * mScreenW, 200 * mScreenH, -200 * mScreenW, 100 * mScreenH, -250 * mScreenW, 150 * mScreenH, "gray", "", 3, 2), ("6c", 19, "", "", -200 * mScreenW, 200 * mScreenH, -100 * mScreenW, 100 * mScreenH, -150 * mScreenW, 150 * mScreenH, "white", "", 3, 3), ("6d", 20, "", "", -100 * mScreenW, 200 * mScreenH, 0 * mScreenW, 100 * mScreenH, -50 * mScreenW, 150 * mScreenH, "gray", "", 3, 4), ("6e", 21, "", "", 0 * mScreenW, 200 * mScreenH, 100 * mScreenW, 100 * mScreenH, 50 * mScreenW, 150 * mScreenH, "white", "", 3, 5), ("6f", 22, "", "", 100 * mScreenW, 200 * mScreenH, 200 * mScreenW, 100 * mScreenH, 150 * mScreenW, 150 * mScreenH, "gray", "", 3, 6), ("6g", 23, "", "", 200 * mScreenW, 200 * mScreenH, 300 * mScreenW, 100 * mScreenH, 250 * mScreenW, 150 * mScreenH, "white", "", 3, 7), ("6h", 24, "", "", 300 * mScreenW, 200 * mScreenH, 400 * mScreenW, 100 * mScreenH, 350 * mScreenW, 150 * mScreenH, "gray", "", 3, 8), 
     ("5a", 25, "", "", -400 * mScreenW, 100 * mScreenH, -300 * mScreenW, 0 * mScreenH, -350 * mScreenW, 50 * mScreenH, "gray", "", 4, 1), ("5b", 26, "", "", -300 * mScreenW, 100 * mScreenH, -200 * mScreenW, 0 * mScreenH, -250 * mScreenW, 50 * mScreenH, "white", "", 4, 2), ("5c", 27, "", "", -200 * mScreenW, 100 * mScreenH, -100 * mScreenW, 0 * mScreenH, -150 * mScreenW, 50 * mScreenH, "gray", "", 4, 3), ("5d", 28, "", "", -100 * mScreenW, 100 * mScreenH, 0 * mScreenW, 0 * mScreenH, -50 * mScreenW, 50 * mScreenH, "white", "", 4, 4), ("5e", 29, "", "", 0 * mScreenW, 100 * mScreenH, 100 * mScreenW, 0 * mScreenH, 50 * mScreenW, 50 * mScreenH, "gray", "", 4, 5), ("5f", 30, "", "", 100 * mScreenW, 100 * mScreenH, 200 * mScreenW, 0 * mScreenH, 150 * mScreenW, 50 * mScreenH, "white", "", 4, 6), ("5g", 31, "", "", 200 * mScreenW, 100 * mScreenH, 300 * mScreenW, 0 * mScreenH, 250 * mScreenW, 50 * mScreenH, "gray", "", 4, 7), ("5h", 32, "", "", 300 * mScreenW, 100 * mScreenH, 400 * mScreenW, 0 * mScreenH, 350 * mScreenW, 50 * mScreenH, "white", "", 4, 8), 
     ("4a", 33, "", "", -400 * mScreenW, 0 * mScreenH, -300 * mScreenW, -100 * mScreenH, -350 * mScreenW, -50 * mScreenH, "white", "", 5, 1), ("4b", 34, "", "", -300 * mScreenW, 0 * mScreenH, -200 * mScreenW, -100 * mScreenH, -250 * mScreenW, -50 * mScreenH, "gray", "", 5, 2), ("4c", 35, "", "", -200 * mScreenW, 0 * mScreenH, -100 * mScreenW, -100 * mScreenH, -150 * mScreenW, -50 * mScreenH, "white", "", 5, 3), ("4d", 36, "", "", -100 * mScreenW, 0 * mScreenH, 0 * mScreenW, -100 * mScreenH, -50 * mScreenW, -50 * mScreenH, "gray", "", 5, 4), ("4e", 37, "", "", 0 * mScreenW, 0 * mScreenH, 100 * mScreenW, -100 * mScreenH, 50 * mScreenW, -50 * mScreenH, "white", "", 5, 5), ("4f", 38, "", "", 100 * mScreenW, 0 * mScreenH, 200 * mScreenW, -100 * mScreenH, 150 * mScreenW, -50 * mScreenH, "gray", "", 5, 6), ("4g", 39, "", "", 200 * mScreenW, 0 * mScreenH, 300 * mScreenW, -100 * mScreenH, 250 * mScreenW, -50 * mScreenH, "white", "", 5, 7), ("4h", 40, "", "", 300 * mScreenW, 0 * mScreenH, 400 * mScreenW, -100 * mScreenH, 350 * mScreenW, -50 * mScreenH, "gray", "", 5, 8),
     ("3a", 41, "", "", -400 * mScreenW, -100 * mScreenH, -300 * mScreenW, -200 * mScreenH, -350 * mScreenW, -150 * mScreenH, "gray", "", 6, 1), ("3b", 42, "", "", -300 * mScreenW, -100 * mScreenH, -200 * mScreenW, -200 * mScreenH, -250 * mScreenW, -150 * mScreenH, "white", "", 6, 2), ("3c", 43, "", "", -200 * mScreenW, -100 * mScreenH, -100 * mScreenW, -200 * mScreenH, -150 * mScreenW, -150 * mScreenH, "gray", "", 6, 3), ("3d", 44, "", "", -100 * mScreenW, -100 * mScreenH, 0 * mScreenW, -200 * mScreenH, -50 * mScreenW, -150 * mScreenH, "white", "", 6, 4), ("3e", 45, "", "", 0 * mScreenW, -100 * mScreenH, 100 * mScreenW, -200 * mScreenH, 50 * mScreenW, -150 * mScreenH, "gray", "", 6, 5), ("3f", 46, "", "", 100 * mScreenW, -100 * mScreenH, 200 * mScreenW, -200 * mScreenH, 150 * mScreenW, -150 * mScreenH, "white", "", 6, 6), ("3g", 47, "", "", 200 * mScreenW, -100 * mScreenH, 300 * mScreenW, -200 * mScreenH, 250 * mScreenW, -150 * mScreenH, "gray", "", 6, 7), ("3h", 48, "", "", 300 * mScreenW, -100 * mScreenH, 400 * mScreenW, -200 * mScreenH, 350 * mScreenW, -150 * mScreenH, "white", "", 6, 8),
     ("2a", 49, "white_pawn", dirLocation + "chesswhite_5.png", -400 * mScreenW, -200 * mScreenH, -300 * mScreenW, -300 * mScreenH, -350 * mScreenW, -250 * mScreenH, "white", "white", 7, 1), ("2b", 50, "white_pawn", dirLocation + "chesswhite_5.png", -300 * mScreenW, -200 * mScreenH, -200 * mScreenW, -300 * mScreenH, -250 * mScreenW, -250 * mScreenH, "gray", "white", 7, 2), ("2c", 51, "white_pawn", dirLocation + "chesswhite_5.png", -200 * mScreenW, -200 * mScreenH, -100 * mScreenW, -300 * mScreenH, -150 * mScreenW, -250 * mScreenH, "white", "white", 7, 3), ("2d", 52, "white_pawn", dirLocation + "chesswhite_5.png", -100 * mScreenW, -200 * mScreenH, 0 * mScreenW, -300 * mScreenH, -50 * mScreenW, -250 * mScreenH, "gray", "white", 7, 4), ("2e", 53, "white_pawn", dirLocation + "chesswhite_5.png", 0 * mScreenW, -200 * mScreenH, 100 * mScreenW, -300 * mScreenH, 50 * mScreenW, -250 * mScreenH, "white", "white", 7, 5), ("2f", 54, "white_pawn", dirLocation + "chesswhite_5.png", 100 * mScreenW, -200 * mScreenH, 200 * mScreenW, -300 * mScreenH, 150 * mScreenW, -250 * mScreenH, "gray", "white", 7, 6), ("2g", 55, "white_pawn", dirLocation + "chesswhite_5.png", 200 * mScreenW, -200 * mScreenH, 300 * mScreenW, -300 * mScreenH, 250 * mScreenW, -250 * mScreenH, "white", "white", 7, 7), ("2h", 56, "white_pawn", dirLocation + "chesswhite_5.png", 300 * mScreenW, -200 * mScreenH, 400 * mScreenW, -300 * mScreenH, 350 * mScreenW, -250 * mScreenH, "gray", "white", 7, 8),
-    ("1a", 57, "white_1_rock", dirLocation + "chesswhite_2.png", -400 * mScreenW, -300 * mScreenH, -300 * mScreenW, -400 * mScreenH, -350 * mScreenW, -350 * mScreenH, "gray", "white", 8, 1), ("1b", 58, "white_knight", dirLocation + "chesswhite_3.png", -300 * mScreenW, -300 * mScreenH, -200 * mScreenW, -400 * mScreenH, -250 * mScreenW, -350 * mScreenH, "white", "white", 8, 2), ("1c", 59, "white_bishop", dirLocation + "chesswhite_4.png", -200 * mScreenW, -300 * mScreenH, -100 * mScreenW, -400 * mScreenH, -150 * mScreenW, -350 * mScreenH, "gray", "white", 8, 3), ("1d", 60, "white_queen", dirLocation + "chesswhite_1.png", -100 * mScreenW, -300 * mScreenH, 0 * mScreenW, -400 * mScreenH, -50 * mScreenW, -350 * mScreenH, "white", "white", 8, 4), ("1e", 61, "white_king", dirLocation + "chesswhite_0.png", 0 * mScreenW, -300 * mScreenH, 100 * mScreenW, -400 * mScreenH, 50 * mScreenW, -350 * mScreenH, "gray", "white", 8, 5), ("1f", 62, "white_bishop", dirLocation + "chesswhite_4.png", 100 * mScreenW, -300 * mScreenH, 200 * mScreenW, -400 * mScreenH, 150 * mScreenW, -350 * mScreenH, "white", "white", 8, 6), ("1g", 63, "white_knight", dirLocation + "chesswhite_3.png", 200 * mScreenW, -300 * mScreenH, 300 * mScreenW, -400 * mScreenH, 250 * mScreenW, -350 * mScreenH, "gray", "white", 8, 7), ("1h", 64, "white_2_rock", dirLocation + "chesswhite_2.png", 300 * mScreenW, -300 * mScreenH, 400 * mScreenW, -400 * mScreenH, 350 * mScreenW, -350 * mScreenH, "white", "white", 8, 8)
+    ("1a", 57, "white_1_rook", dirLocation + "chesswhite_2.png", -400 * mScreenW, -300 * mScreenH, -300 * mScreenW, -400 * mScreenH, -350 * mScreenW, -350 * mScreenH, "gray", "white", 8, 1), ("1b", 58, "white_knight", dirLocation + "chesswhite_3.png", -300 * mScreenW, -300 * mScreenH, -200 * mScreenW, -400 * mScreenH, -250 * mScreenW, -350 * mScreenH, "white", "white", 8, 2), ("1c", 59, "white_bishop", dirLocation + "chesswhite_4.png", -200 * mScreenW, -300 * mScreenH, -100 * mScreenW, -400 * mScreenH, -150 * mScreenW, -350 * mScreenH, "gray", "white", 8, 3), ("1d", 60, "white_queen", dirLocation + "chesswhite_1.png", -100 * mScreenW, -300 * mScreenH, 0 * mScreenW, -400 * mScreenH, -50 * mScreenW, -350 * mScreenH, "white", "white", 8, 4), ("1e", 61, "white_king", dirLocation + "chesswhite_0.png", 0 * mScreenW, -300 * mScreenH, 100 * mScreenW, -400 * mScreenH, 50 * mScreenW, -350 * mScreenH, "gray", "white", 8, 5), ("1f", 62, "white_bishop", dirLocation + "chesswhite_4.png", 100 * mScreenW, -300 * mScreenH, 200 * mScreenW, -400 * mScreenH, 150 * mScreenW, -350 * mScreenH, "white", "white", 8, 6), ("1g", 63, "white_knight", dirLocation + "chesswhite_3.png", 200 * mScreenW, -300 * mScreenH, 300 * mScreenW, -400 * mScreenH, 250 * mScreenW, -350 * mScreenH, "gray", "white", 8, 7), ("1h", 64, "white_2_rook", dirLocation + "chesswhite_2.png", 300 * mScreenW, -300 * mScreenH, 400 * mScreenW, -400 * mScreenH, 350 * mScreenW, -350 * mScreenH, "white", "white", 8, 8)
 ]
 
 kingFields = [(50 * mScreenW, 350 * mScreenH, "white", "black"), (50 * mScreenW, -350 * mScreenH, "gray", "white")]  # centerX, centerY, fieldColor, figureColor
@@ -38,7 +38,7 @@ lastPossibleFields = []
 possibleHitFields = []
 schlagenEnPassant = [0, 0, 0]
 sEPHit = []
-rochadeMoved = [False, False, False, False, False, False]  # w_king, w_1_rock, w_2_rock, b_king, b_1_rock, b_2_rock | Falls bereits bewegt -> entsprechender Wert == True
+rochadeMoved = [False, False, False, False, False, False]  # w_king, w_1_rook, w_2_rook, b_king, b_1_rook, b_2_rook | Falls bereits bewegt -> entsprechender Wert == True
 activePlayer = "white"
 activePlayerText = "Weiss"
 enemy = "black"
@@ -149,7 +149,7 @@ def possibleKnightMoves():  # Funktion, die alle möglichen Bewegungen für ein 
     return possibleMoves, possibleHitFields  # Zurückgeben aller möglichen Pferd bewegungen
 
 
-def possibleRockMoves():  # Funktion zum Ermitteln aller möglichen Turmzüge
+def possiblerookMoves():  # Funktion zum Ermitteln aller möglichen Turmzüge
 
     repaintX, repaintY, repaintTexture, rFigure, rFieldNumber, rColum, rRow = selectedField[0]  # Entpacken des ausgewählten Feldes
     possibleMoves = []
@@ -201,11 +201,11 @@ def possiblesBishopMoves():  # Funktion zum Ermitteln aller möglichen Läufer b
         
 # Bedient sich an der Läufer- und Turmfunktion, da sich die Dame wie eine Kombination aus beiden bewegt
 def possibleQueenMoves():  # Funktion zum Ermitteln aller möglichen Bewegungen für die Dame
-    rock, hitFieldsRock = possibleRockMoves()
+    rook, hitFieldsrook = possiblerookMoves()
     bishop, hitFieldsBishop = possiblesBishopMoves()
     
-    possibleMoves = rock + bishop  # Zusammen führen der möglichen Felder aus beiden Klassen, da sich nicht Turm oder Läufer, sondern Turm und Läufer ist
-    possibleHitFields = hitFieldsRock + hitFieldsBishop
+    possibleMoves = rook + bishop  # Zusammen führen der möglichen Felder aus beiden Klassen, da sich nicht Turm oder Läufer, sondern Turm und Läufer ist
+    possibleHitFields = hitFieldsrook + hitFieldsBishop
     
     return possibleMoves, possibleHitFields  # Zurückgeben aller möglichen Zugfelder
 
@@ -250,10 +250,10 @@ def possibleKingMoves():  # Funktion zum Ermitteln aller möglichen Bewegungen f
                     for index in evenOrOdd:
                         if 64 > rFieldNumber + index - 1 > -1:  # Falls der Index außerhalb des Schachfeldes liegen würde, wird hier abgebrochen, damit ein Error verhindert wird
                             field = chessField[rFieldNumber + index - 1]
-                            if index == evenOddIndex[3] and field[2] == kingColor + "_" + str(evenOddIndex[2]) + "_rock":  # Falls der letzte Index für die Rochade erreicht wurde und auf dem letzten Feld der Turm steht, der zu Beginn des Spiels auf dem entsprechenden Feld stand
+                            if index == evenOddIndex[3] and field[2] == kingColor + "_" + str(evenOddIndex[2]) + "_rook":  # Falls der letzte Index für die Rochade erreicht wurde und auf dem letzten Feld der Turm steht, der zu Beginn des Spiels auf dem entsprechenden Feld stand
                                 kingField = chessField[rFieldNumber + evenOddIndex[0] - 1]  # Feld auf das der König bei der entsprechenden Rochade zieht
-                                rockField = chessField[rFieldNumber + evenOddIndex[1] - 1]  # Feld auf das der Turm bei der entsprechenden Rochade zieht
-                                rochadeFigurePlace.append((field[1], kingField[1], kingColor + "_king", dirLocation + "chess" + kingColor + "_0.png", kingColor, (kingField[8], kingField[9], kingField[10]), rockField[1], kingColor + "_" + str(evenOddIndex[2]) + "_rock", dirLocation + "chess" + kingColor + "_2.png", kingColor, (rockField[8], rockField[9], rockField[10])))
+                                rookField = chessField[rFieldNumber + evenOddIndex[1] - 1]  # Feld auf das der Turm bei der entsprechenden Rochade zieht
+                                rochadeFigurePlace.append((field[1], kingField[1], kingColor + "_king", dirLocation + "chess" + kingColor + "_0.png", kingColor, (kingField[8], kingField[9], kingField[10]), rookField[1], kingColor + "_" + str(evenOddIndex[2]) + "_rook", dirLocation + "chess" + kingColor + "_2.png", kingColor, (rookField[8], rookField[9], rookField[10])))
                                 possibleMoves.append((field[8], field[9], field[10], field[1]))
                             if field[11] != "":
                                 break
@@ -300,7 +300,7 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
                     eFigure = inputInt("Bauern ersetzen durch '1' Turm, '2' Pferd, '3' Läufer, '4' Dame")  # Leider hier UI-technisch sehr unschön, ging aber leider nicht anders, da TigerJython auf Maus Callbacks anscheinend Fenster erstellen, diese aber nicht mehr mit Inhalt füllen kann
                     if eFigure == 1:
                         output = "Turm"
-                        eFigure = "_rock"
+                        eFigure = "_rook"
                         eFigureTexture = "_2.png"
                     elif eFigure == 2:
                         output = "Pferd"
@@ -326,16 +326,16 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
                 rochadeMoved[0] = True
             if sFigure.startswith("black"):
                 rochadeMoved[3] = True
-        if sFigure.endswith("rock"):
+        if sFigure.endswith("rook"):
             if sFigure.startswith("white"):
-                if sFigure == "white_1_rock":
+                if sFigure == "white_1_rook":
                     rochadeMoved[1] = True
-                if sFigure == "white_2_rock":
+                if sFigure == "white_2_rook":
                     rochadeMoved[2] = True
             if sFigure.startswith("black"):
-                if sFigure == "black_1_rock":
+                if sFigure == "black_1_rook":
                     rochadeMoved[4] = True
-                if sFigure == "black_2_rock":
+                if sFigure == "black_2_rook":
                     rochadeMoved[5] = True 
     
     mFigure = "" + sFigure
@@ -348,18 +348,18 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
     
     if len(rochadeFigurePlace) != 0:  # Falls eine Rochade durchgeführt werden könnte
         for t in rochadeFigurePlace:
-            clickedField, kFieldNumber, k, kTexture, kColor, kT, rockFieldNumber, rock, rockTexture, rockColor, rockT = t
+            clickedField, kFieldNumber, k, kTexture, kColor, kT, rookFieldNumber, rook, rookTexture, rookColor, rookT = t
             if clickedField - 1 == moveToIndex:  # Prüft für jede Rochade, die in diesem Zug hätte durchgeführt werden können, ob sie durchgeführt wurde
                 
                 kingField = chessField[kFieldNumber - 1]  # weder source noch moveto Feld, da sich König und Turm bei der Rochade auf andere Felder bewegen, weshalb hier diese Felder entpackt werden müssen
-                rockField = chessField[rockFieldNumber - 1]  # weder source noch moveto Feld, da sich König und Turm bei der Rochade auf andere Felder bewegen, weshalb hier diese Felder entpackt werden müssen
+                rookField = chessField[rookFieldNumber - 1]  # weder source noch moveto Feld, da sich König und Turm bei der Rochade auf andere Felder bewegen, weshalb hier diese Felder entpackt werden müssen
                 
                 eKFieldKey, eKFieldNumber, eKFigure, eKFigureTexture, eKLeftX, eKYAbove, eKRightX, eKYDown, eKCenterX, eKCenterY, eKFieldTexture, eKFigureColor, eKColum, eKRow = kingField
-                eRockFieldKey, eRockFieldNumber, eRockFigure, eRockFigureTexture, eRockLeftX, eRockYAbove, eRockRightX, eRockYDown, eRockCenterX, eRockCenterY, eRockFieldTexture, eRockFigureColor, eRockColum, eRockRow = rockField
+                erookFieldKey, erookFieldNumber, erookFigure, erookFigureTexture, erookLeftX, erookYAbove, erookRightX, erookYDown, erookCenterX, erookCenterY, erookFieldTexture, erookFigureColor, erookColum, erookRow = rookField
                 
                 # Einpacken der überschriebenen Felder
                 chessField[kFieldNumber - 1] = (eKFieldKey, eKFieldNumber, k, kTexture, eKLeftX, eKYAbove, eKRightX, eKYDown, eKCenterX, eKCenterY, eKFieldTexture, kColor, eKColum, eKRow)
-                chessField[rockFieldNumber - 1] = (eRockFieldKey, eRockFieldNumber, rock, rockTexture, eRockLeftX, eRockYAbove, eRockRightX, eRockYDown, eRockCenterX, eRockCenterY, eRockFieldTexture, rockColor, eRockColum, eRockRow)
+                chessField[rookFieldNumber - 1] = (erookFieldKey, erookFieldNumber, rook, rookTexture, erookLeftX, erookYAbove, erookRightX, erookYDown, erookCenterX, erookCenterY, erookFieldTexture, rookColor, erookColum, erookRow)
             
                 rochadeFigurePlace = []    
                 # Moveto leeren, da sich Turm und König ja bereits auf andere Felder bewegt haben 
@@ -496,8 +496,8 @@ def checkFigureType(figure):  # Funktion zum Überprüfen, für welche Figur die
         lastPossibleFields, possibleHitFields = possiblePawnMoves()   
     if figure.endswith("knight"):
         lastPossibleFields, possibleHitFields = possibleKnightMoves()    
-    if figure.endswith("rock"):
-        lastPossibleFields, possibleHitFields = possibleRockMoves()  
+    if figure.endswith("rook"):
+        lastPossibleFields, possibleHitFields = possiblerookMoves()  
     if figure.endswith("bishop"):
         lastPossibleFields, possibleHitFields = possiblesBishopMoves()   
     if figure.endswith("queen"):

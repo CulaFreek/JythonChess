@@ -20,9 +20,9 @@ def gamemodeDialog():
 
     oneDeviceRadio = RadioEntry("Play with a Friend on this Device")
     onlinePlayerRadio = RadioEntry("Play online with your Friends")
-    aiEnemyRadio = RadioEntry("Play against AI")
+    botEnemyRadio = RadioEntry("Play against bot")
     closeButton = ButtonEntry("Play now")
-    gamemodePane = EntryPane(oneDeviceRadio, onlinePlayerRadio, aiEnemyRadio)
+    gamemodePane = EntryPane(oneDeviceRadio, onlinePlayerRadio, botEnemyRadio)
     closePane = EntryPane(closeButton)
     chooseGamemode = EntryDialog(fullscreenEntryPane, ScreenResolution, gamemodePane, closePane)
     chooseGamemode.setTitle("Choose your gamemode")
@@ -42,7 +42,7 @@ def gamemodeDialog():
                 gamemode = 0
             elif onlinePlayerRadio.getValue():
                 gamemode = 1
-            elif aiEnemyRadio.getValue():
+            elif botEnemyRadio.getValue():
                 gamemode = 2
             else:
                 close = False
