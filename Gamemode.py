@@ -1,19 +1,24 @@
-from gturtle import *
 import Values
                 
 if __name__ == "__main__":
     
     import RequestGamemode as RG
 
-    chosenGamemode, screenW, screenH = RG.gamemodeDialog()
+    chosenGamemode, screenH, screenW = RG.gamemodeDialog()
 
     Values.chosenGamemode = chosenGamemode
-    Values.screenW = screenW
     Values.screenH = screenH
+    Values.screenW = screenW
     
     if chosenGamemode == 0:
-        import OneDeviceChess as ODC
+        print(0)
+        print(screenH, screenW)
+        #  import OneDeviceChess as ODC
     if chosenGamemode == 1:
-        import OnlineChess as OC
+        print(1)
+        print(screenH, screenW)
+        #  import OnlineChess as OC
     if chosenGamemode == 2:
-        import botChess as BC
+        print(2)
+        print(screenH, screenW)
+        #  import botChess as BC
