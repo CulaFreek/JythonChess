@@ -1,3 +1,3 @@
 chosenGamemode = None
-screenW = 0
-screenH = 0
+screenW = 800
+screenH = 800

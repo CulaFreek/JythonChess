@@ -40,7 +40,7 @@ selectedField = []
 rochadeFigurePlace = []
 lastPossibleFields = []
 possibleHitFields = []
-schlagenEnPassant = [0, 0, 0]
+schlagenEnPassant = [0, 0, 0]  # [move, sourceField, MoveToField] (move: ZUg in dem der Bauer geschlagen werden könnte)
 sEPHit = []
 rochadeMoved = [False, False, False, False, False, False]  # w_king, w_1_rook, w_2_rook, b_king, b_1_rook, b_2_rook | Falls bereits bewegt -> entsprechender Wert == True
 activePlayer = "white"
@@ -110,14 +110,14 @@ def possiblePawnMoves():  # Funktion die alle möglichen Bewegungen für den aus
                     elif abs(index) == 7 or abs(index) == 9:
                         sEPField = chessField[schlagenEnPassant[2] - 1]  # Feld auf dem der 'Schlagen en passant' Bauer steht einlesen
                         sEPColor = True
-                        sEPHit = [(sEPField[8], sEPField[9], sEPField[10], sEPField[1], field[6], field[7], field[8])]  # Speichern der Felder, damit diese korrekt gefärbt und falls der Bauer den anderen en passant schlägt dieser entfernt wird
+                        sEPHit = [(sEPField[6], sEPField[7], sEPField[8], sEPField[1], field[6], field[7], field[8])]  # Speichern der Felder, damit diese korrekt gefärbt und falls der Bauer den anderen en passant schlägt dieser entfernt wird
                     if abs(index) == 8 and field[9] != "":  # Bauern können nur nach vorne laufen, wenn das Feld vor ihnen Frei ist
                         continue
                     if abs(index) == 16 and not ((rColum == 2 and rFigure == "black_pawn") or (rColum == 7 and rFigure == "white_pawn")):  # Falls der abzufragende Index 16 ist und es sich nicht um einen Bauern handelt, der noch auf seinem Startfeld steht, wird mit dem nächsten Schleifendurchlauf fortgefahren
                         continue
                     if abs(index) == 16:  # Prüft, ob beide Felder (das über welches der Bauer läuft und das auf welchem er landet) frei sind
                         rField = chessField[rFieldNumber + (index // 2) - 1]
-                        if rField[7] != "" or field[7] != "":
+                        if rField[9] != "" or field[9] != "":
                             continue
     
                     possibleMoves.append((field[6], field[7], field[8], field[1]))
@@ -132,7 +132,7 @@ def possibleKnightMoves():  # Funktion, die alle möglichen Bewegungen für ein 
     
     repaintX, repaintY, repaintTexture, rFigure, rFieldNumber, rColum, rRow = selectedField[0]  # Entpacken des ausgewählten Feldes
     possibleMoves = []
-    possibleHitFields = []
+    possibleHitFieldsKnight = []
     
     indexes = [-17, -15, -10, -6, 6, 10, 15, 17]  # Alle möglichen Pferd bewegungen, falls die entsprechenden Felder frei oder von Gegnern besetzt sind
     for index in indexes:  # Durchlaufen jedes indexes und überprüfen, ob das entsprechende Feld frei oder von einem Gegner besetzt ist
@@ -142,17 +142,17 @@ def possibleKnightMoves():  # Funktion, die alle möglichen Bewegungen für ein 
                 continue
             if field[9] == "" or field[9] == enemy:
                 possibleMoves.append((field[6], field[7], field[8], field[1]))
-                if field[11] == enemy:
-                    possibleHitFields.append((field[6], field[7], field[8], field[1]))  # Liste mit Feldern, die Rot gefärbt werden sollen: Eine Figur steht auf diesen
+                if field[9] == enemy:
+                    possibleHitFieldsKnight.append((field[6], field[7], field[8], field[1]))  # Liste mit Feldern, die Rot gefärbt werden sollen: Eine Figur steht auf diesen
 
-    return possibleMoves, possibleHitFields  # Zurückgeben aller möglichen Pferd bewegungen
+    return possibleMoves, possibleHitFieldsKnight  # Zurückgeben aller möglichen Pferd bewegungen
 
 
-def possiblerookMoves():  # Funktion zum Ermitteln aller möglichen Turmzüge
+def possibleRookMoves():  # Funktion zum Ermitteln aller möglichen Turmzüge
 
     repaintX, repaintY, repaintTexture, rFigure, rFieldNumber, rColum, rRow = selectedField[0]  # Entpacken des ausgewählten Feldes
     possibleMoves = []
-    possibleHitFields = []
+    possibleHitFieldsRook = []
         
     tupleList = [(rColum, 8, 0, -1), (rColum, 8, 9, 1), (rRow, 1, 0, -1), (rRow, 1, 9, 1)]  # [0]: Spalte oder Zeile [1]: Felder, die im index vor / zurückgegangen werden müssen, um das nächste Feld in der Reihe oder Spalte zu ermitteln [2]: Ende, falls die Zeile oder Spalte vor Ende überprüft wird bricht die Schleife nach dieser ab [3]: zum Negieren der Laufrichtung und des Indexes
     for t in tupleList:
@@ -163,19 +163,19 @@ def possiblerookMoves():  # Funktion zum Ermitteln aller möglichen Turmzüge
             index = number * m * step  # Ermitteln des Indexes, der abgefragt werden soll
             field = chessField[rFieldNumber + index - 1]
             if field[9] == "" or field[9] == enemy:
-                possibleMoves.append((field[68], field[7], field[8], field[1]))
-            if field[11] != "":  # Schleifenabbruch bei Gegner oder bei eigner Figur | Bei Gegner wird dieser zuvor noch ermittelt und in die möglichen Züge aufgenommen
-                possibleHitFields.append((field[6], field[7], field[8], field[1]))  # Liste mit Feldern, die Rot gefärbt werden sollen: Eine Figur steht auf diesen
+                possibleMoves.append((field[6], field[7], field[8], field[1]))
+            if field[9] != "":  # Schleifenabbruch bei Gegner oder bei eigner Figur | Bei Gegner wird dieser zuvor noch ermittelt und in die möglichen Züge aufgenommen
+                possibleHitFieldsRook.append((field[6], field[7], field[8], field[1]))  # Liste mit Feldern, die Rot gefärbt werden sollen: Eine Figur steht auf diesen
                 break
     
-    return possibleMoves, possibleHitFields  # Zurückgeben aller möglichen Bewegungen für den ausgewählten Turm
+    return possibleMoves, possibleHitFieldsRook  # Zurückgeben aller möglichen Bewegungen für den ausgewählten Turm
 
 
 def possiblesBishopMoves():  # Funktion zum Ermitteln aller möglichen Läufer bewegungen
 
     repaintX, repaintY, repaintTexture, rFigure, rFieldNumber, rColum, rRow = selectedField[0]  # Entpacken des ausgewählten Feldes
     possibleMoves = []
-    possibleHitFields = []
+    possibleHitFieldsBishop = []
     
     tupleList = [(-9, 0, -1, 1), (-7, 0, -1, 2), (7, 9, 1, 3), (9, 9, 1, 4)]  # [0]: Feldindex, auf das sich bewegt werden soll, [1]: Reihenende, [2]: Schritt, [3]: Runde (Nummer des Tuples)
     for t in tupleList:
@@ -191,22 +191,22 @@ def possiblesBishopMoves():  # Funktion zum Ermitteln aller möglichen Läufer b
                     break 
                 if field[9] == "" or field[9] == enemy:
                     possibleMoves.append((field[6], field[7], field[8], field[1]))
-                if field[11] != "":
-                    possibleHitFields.append((field[6], field[7], field[8], field[1]))  # Liste mit Feldern, die Rot gefärbt werden sollen: Eine Figur steht auf diesen
+                if field[9] != "":
+                    possibleHitFieldsBishop.append((field[6], field[7], field[8], field[1]))  # Liste mit Feldern, die Rot gefärbt werden sollen: Eine Figur steht auf diesen
                     break
     
-    return possibleMoves, possibleHitFields  # Zurückgeben aller ermittelten möglichen Läufer bewegungen
+    return possibleMoves, possibleHitFieldsBishop  # Zurückgeben aller ermittelten möglichen Läufer bewegungen
         
         
 # Bedient sich an der Läufer- und Turmfunktion, da sich die Dame wie eine Kombination aus beiden bewegt
 def possibleQueenMoves():  # Funktion zum Ermitteln aller möglichen Bewegungen für die Dame
-    rook, hitFieldsrook = possiblerookMoves()
+    rook, hitFieldsRook = possibleRookMoves()
     bishop, hitFieldsBishop = possiblesBishopMoves()
     
     possibleMoves = rook + bishop  # Zusammen führen der möglichen Felder aus beiden Klassen, da sich nicht Turm oder Läufer, sondern Turm und Läufer ist
-    possibleHitFields = hitFieldsrook + hitFieldsBishop
+    possibleHitFieldsQueen = hitFieldsRook + hitFieldsBishop
     
-    return possibleMoves, possibleHitFields  # Zurückgeben aller möglichen Zugfelder
+    return possibleMoves, possibleHitFieldsQueen  # Zurückgeben aller möglichen Zugfelder
 
             
 def possibleKingMoves():  # Funktion zum Ermitteln aller möglichen Bewegungen für den König
@@ -252,7 +252,7 @@ def possibleKingMoves():  # Funktion zum Ermitteln aller möglichen Bewegungen f
                             if index == evenOddIndex[3] and field[2] == kingColor + "_" + str(evenOddIndex[2]) + "_rook":  # Falls der letzte Index für die Rochade erreicht wurde und auf dem letzten Feld der Turm steht, der zu Beginn des Spiels auf dem entsprechenden Feld stand
                                 kingField = chessField[rFieldNumber + evenOddIndex[0] - 1]  # Feld auf das der König bei der entsprechenden Rochade zieht
                                 rookField = chessField[rFieldNumber + evenOddIndex[1] - 1]  # Feld auf das der Turm bei der entsprechenden Rochade zieht
-                                rochadeFigurePlace.append((field[1], kingField[1], kingColor + "_king", dirLocation + "chess" + kingColor + "_0.png", kingColor, (kingField[8], kingField[9], kingField[10]), rookField[1], kingColor + "_" + str(evenOddIndex[2]) + "_rook", dirLocation + "chess" + kingColor + "_2.png", kingColor, (rookField[8], rookField[9], rookField[10])))
+                                rochadeFigurePlace.append((field[1], kingField[1], kingColor + "_king", dirLocation + "chess" + kingColor + "_0.png", kingColor, (kingField[6], kingField[7], kingField[8]), rookField[1], kingColor + "_" + str(evenOddIndex[2]) + "_rook", dirLocation + "chess" + kingColor + "_2.png", kingColor, (rookField[6], rookField[7], rookField[8])))
                                 possibleMoves.append((field[6], field[7], field[8], field[1]))
                             if field[9] != "":
                                 break
@@ -283,8 +283,8 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
             fX, fY, figureTexture, fFieldNumber, fTargetFieldX, fTargetFieldY, fFigureTexture = sEPHit[0]  # Entpacken des 'schlagen en passant' hit
             if fTargetFieldX == mCenterX and fTargetFieldY == mCenterY:  # Falls das 'schlagen en passant' Feld mit den Koordinaten des Feldes, auf das sich die Figur gerade bewegt übereinstimmen
                 hittetPawn = chessField[fFieldNumber - 1]
-                hPFieldKey, hPFieldNumber, hPFigure, hPFigureTexture, hPLleftX, hPYAbove, hPRightX, hPYDown, hPCenterX, hPCenterY, hPFieldTexture, hPFigureColor, hPColum, hPRow = hittetPawn  # Entpacken des Feldes mit dem geschlagenen Bauern, da dieser sich nicht auf dem move_to Feld befindet, jedoch trotzdem entfernt werden muss
-                chessField[fFieldNumber - 1] = (hPFieldKey, hPFieldNumber, "", "", hPLleftX, hPYAbove, hPRightX, hPYDown, hPCenterX, hPCenterY, hPFieldTexture, "", hPColum, hPRow)  # Verpacken des entsprechenden Feldes / überschreiben
+                hPFieldKey, hPFieldNumber, hPFigure, hPFigureTexture, hPLleftX, hPYAbove, hPCenterX, hPCenterY, hPFieldTexture, hPFigureColor, hPColum, hPRow = hittetPawn  # Entpacken des Feldes mit dem geschlagenen Bauern, da dieser sich nicht auf dem move_to Feld befindet, jedoch trotzdem entfernt werden muss
+                chessField[fFieldNumber - 1] = (hPFieldKey, hPFieldNumber, "", "", hPLleftX, hPYAbove, hPCenterX, hPCenterY, hPFieldTexture, "", hPColum, hPRow)  # Verpacken des entsprechenden Feldes / überschreiben
             sEPHit = []
         
         if sFigure.endswith("pawn"):  # Abfrage, ob sich ein Bauer in diesem Zug um 16 Felder nach vorne bewegt, um diesen dann in die 'Schlagen en passant' Möglichkeit einzuschreiben
@@ -295,8 +295,9 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
         
             if (mColum == 1 and sFigure.startswith("white")) or (mColum == 8 and sFigure.startswith("black")):  # Falls ein Bauer sich auf die gegnerische letzte Linie begibt, tauscht er seinen Bauern gegen einen Turm, Pferd, Läufer oder eine Dame ein
                 sure = False
-                while not sure:
-                    eFigure = input("Bauern ersetzen durch '1' Turm, '2' Pferd, '3' Läufer, '4' Dame")  # Leider hier UI-technisch sehr unschön, ging aber leider nicht anders, da TigerJython auf Maus Callbacks anscheinend Fenster erstellen, diese aber nicht mehr mit Inhalt füllen kann
+                sFigure = ""
+                while not sure or sFigure == "":
+                    eFigure = int(input("\nBauern ersetzen durch '1' Turm, '2' Pferd, '3' Läufer, '4' Dame: "))  # Leider hier UI-technisch sehr unschön, ging aber leider nicht anders, da TigerJython auf Maus Callbacks anscheinend Fenster erstellen, diese aber nicht mehr mit Inhalt füllen kann
                     if eFigure == 1:
                         output = "Turm"
                         eFigure = "_rook"
@@ -315,10 +316,11 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
                         eFigureTexture = "_1.png"
                     else:
                         continue  # Hier ein else mit contínue, um den restlichen Schleifendurchlauf, also die 'sure' Zuweisung mit der Frage zu überspringen, da eine Zahl eingegeben wurde, der keine Figur zugeordnet ist
-                    sure = askYesNo("Möchtest du deinen Bauern wirklich durch eine*n " + output + " ersetzen?")
-                
-                sFigure = sFigureColor + eFigure
-                sFigureTexture = dirLocation + "chess" + sFigureColor + eFigureTexture                               
+
+                    sFigure = sFigureColor + eFigure
+                    sFigureTexture = dirLocation + "chess" + sFigureColor + eFigureTexture
+
+                    sure = bool(input("\nMöchtest du deinen Bauern wirklich durch eine*n " + output + " ersetzen? \n'True' oder 'False': "))
 
         if sFigure.endswith("king"):  # Deaktivieren der Rochade-Möglichkeit für die entsprechende Figur, falls sich diese bewegt
             if sFigure.startswith("white"):
@@ -353,12 +355,12 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
                 kingField = chessField[kFieldNumber - 1]  # weder source noch moveto Feld, da sich König und Turm bei der Rochade auf andere Felder bewegen, weshalb hier diese Felder entpackt werden müssen
                 rookField = chessField[rookFieldNumber - 1]  # weder source noch moveto Feld, da sich König und Turm bei der Rochade auf andere Felder bewegen, weshalb hier diese Felder entpackt werden müssen
                 
-                eKFieldKey, eKFieldNumber, eKFigure, eKFigureTexture, eKLeftX, eKYAbove, eKRightX, eKYDown, eKCenterX, eKCenterY, eKFieldTexture, eKFigureColor, eKColum, eKRow = kingField
-                erookFieldKey, erookFieldNumber, erookFigure, erookFigureTexture, erookLeftX, erookYAbove, erookRightX, erookYDown, erookCenterX, erookCenterY, erookFieldTexture, erookFigureColor, erookColum, erookRow = rookField
+                eKFieldKey, eKFieldNumber, eKFigure, eKFigureTexture, eKLeftX, eKYAbove, eKCenterX, eKCenterY, eKFieldTexture, eKFigureColor, eKColum, eKRow = kingField
+                eRookFieldKey, eRookFieldNumber, eRookFigure, eRookFigureTexture, eRookLeftX, eRookYAbove, eRookCenterX, eRookCenterY, eRookFieldTexture, eRookFigureColor, eRookColum, eRookRow = rookField
                 
                 # Einpacken der überschriebenen Felder
-                chessField[kFieldNumber - 1] = (eKFieldKey, eKFieldNumber, k, kTexture, eKLeftX, eKYAbove, eKRightX, eKYDown, eKCenterX, eKCenterY, eKFieldTexture, kColor, eKColum, eKRow)
-                chessField[rookFieldNumber - 1] = (erookFieldKey, erookFieldNumber, rook, rookTexture, erookLeftX, erookYAbove, erookRightX, erookYDown, erookCenterX, erookCenterY, erookFieldTexture, rookColor, erookColum, erookRow)
+                chessField[kFieldNumber - 1] = (eKFieldKey, eKFieldNumber, k, kTexture, eKLeftX, eKYAbove, eKCenterX, eKCenterY, eKFieldTexture, kColor, eKColum, eKRow)
+                chessField[rookFieldNumber - 1] = (eRookFieldKey, eRookFieldNumber, rook, rookTexture, eRookLeftX, eRookYAbove, eRookCenterX, eRookCenterY, eRookFieldTexture, rookColor, eRookColum, eRookRow)
             
                 rochadeFigurePlace = []    
                 # Moveto leeren, da sich Turm und König ja bereits auf andere Felder bewegt haben 
@@ -410,11 +412,11 @@ def checkCheck():  # Funktion zum Überprüfen, ob der König im Schach steht
     runde = 0
     for largeTuple in chessField:  # Für jedes Feld prüfen, ob eine gegnerische Figur auf diesem steht
         selectedField = [(largeTuple[6], largeTuple[7], largeTuple[8], largeTuple[2], largeTuple[1], largeTuple[10], largeTuple[11]), runde]  # Neue Werte des Feldes zuweisen, wichtig da sonst die Überprüfung der Möglichen bewegungen der Figuren nicht funktioniert
-        if largeTuple[11] == enemy:
+        if largeTuple[9] == enemy:
             playerChange()  # Wechseln des Gegners wichtig, da für gegnerische Figuren ermittelt werden soll, ob diese den eigenen König schlagen könnten
-            lastPossibleFields, possibleHitFields = checkFigureType(largeTuple[2])  # Funktionsaufruf mit der Figur, die auf dem aktuell überprüften Feld steht
+            lastPossibleFieldsCheck, possibleHitFieldsCheck = checkFigureType(largeTuple[2])  # Funktionsaufruf mit der Figur, die auf dem aktuell überprüften Feld steht
             playerChange()  # Wichtig, da die Schlagmöglichkeit der gegnerischen Figuren gegen den EIGENEN König getestet werden soll
-            for fieldTuple in lastPossibleFields:  # Überprüfen für jedes mögliche Feld, das zuvor ermittelt wurde, ob die Figur den gegnerischen König schlagen könnte
+            for fieldTuple in lastPossibleFieldsCheck:  # Überprüfen für jedes mögliche Feld, das zuvor ermittelt wurde, ob die Figur den gegnerischen König schlagen könnte
                 for king in kingFields:
                     if king[3] == activePlayer and (fieldTuple[0] == king[0] and fieldTuple[1] == king[1]):
                         Check = True  # Schach-Situation durch eine Figur erkannt
@@ -430,8 +432,8 @@ def checkCheckMate():  # Funktion zum Überprüfen, ob ein Spieler Schachmatt is
     for tTuple in chessField:
         selectedField = [(tTuple[6], tTuple[7], tTuple[8], tTuple[2], tTuple[1], tTuple[10], tTuple[11]), runde]  # Neue Werte des Feldes zuweisen, wichtig da sonst die Überprüfung der Möglichen bewegungen der Figuren nicht funktioniert
         if tTuple[9] == activePlayer:
-            lastPossibleFields, possibleHitFields = checkFigureType(tTuple[2])
-            for possibleField in lastPossibleFields:
+            lastPossibleFieldsCheckMate, possibleHitFieldsCheckMate = checkFigureType(tTuple[2])
+            for possibleField in lastPossibleFieldsCheckMate:
                 lRunde = 0
                 for largeTuple in chessField:
                     if possibleField[0] == largeTuple[6] and possibleField[1] == largeTuple[7]:
@@ -498,7 +500,7 @@ def checkFigureType(figure):  # Funktion zum Überprüfen, für welche Figur die
     if figure.endswith("knight"):
         lastPossibleFields1, possibleHitFields1 = possibleKnightMoves()
     if figure.endswith("rook"):
-        lastPossibleFields1, possibleHitFields1 = possiblerookMoves()
+        lastPossibleFields1, possibleHitFields1 = possibleRookMoves()
     if figure.endswith("bishop"):
         lastPossibleFields1, possibleHitFields1 = possiblesBishopMoves()
     if figure.endswith("queen"):
@@ -509,7 +511,7 @@ def checkFigureType(figure):  # Funktion zum Überprüfen, für welche Figur die
     return lastPossibleFields1, possibleHitFields1  # Zurückgeben der möglichen ermittelten Felder
 
 
-def figureSelect(x, y):  # Funktion die auf Aufruf des obigen Maus-callbacks aufgerufen und ausgeführt wird | Das Maus-callback übergibt die angeklickten Koordinaten, mit welchen im Folgenden die angeklickte Position überprüft wird
+def figureSelect(posX, posY):  # Funktion die auf Aufruf des obigen Maus-callbacks aufgerufen und ausgeführt wird | Das Maus-callback übergibt die angeklickten Koordinaten, mit welchen im Folgenden die angeklickte Position überprüft wird
     global sEPHit
     global selectedField
     global lastPossibleFields
@@ -524,7 +526,7 @@ def figureSelect(x, y):  # Funktion die auf Aufruf des obigen Maus-callbacks auf
         for largeTuple in chessField:  # Durchgehen jedes Feldes bis ein Feld mit den angeklickten Koordinaten übereinstimmt, auf diesem werden dann die weiteren Schritte ausgeführt
             moved = False
             fieldKey, fieldNumber, figure, figureTexture, leftX, yAbove, centerX, centerY, fieldTexture, figureColor, colum, row = largeTuple  # Entpacken des Schachfeld Tupels
-            if (x >= leftX and y >= yAbove) and (x <= (leftX + 100 * mScreenW) and y <= (yAbove + 100 * mScreenH)):  # Prüft ob das oben entpackte Schachfeld zu den angeklickten Koordinaten passt
+            if (posX >= leftX and posY >= yAbove) and (posX <= (leftX + 100 * mScreenW) and posY <= (yAbove + 100 * mScreenH)):  # Prüft ob das oben entpackte Schachfeld zu den angeklickten Koordinaten passt
                 kingGetter()  # Wichtig, da es sonst zu illegalen Zugmöglichkeiten kommen kann, da die Könige noch auf anderen Feldern registriert sind
                 if len(lastPossibleFields) != 0:  # Falls bereits eine Figur ausgewählt wurde und Bewegungsmöglichkeiten für die Figur grün gefärbt wurden wir als erstes geprüft, ob das angeklickte Feld eines derer ist, auf die sich die Figur bewegen kann
                     for possibleField in lastPossibleFields: 
@@ -544,15 +546,15 @@ def figureSelect(x, y):  # Funktion die auf Aufruf des obigen Maus-callbacks auf
                                 
                                 inputAllowed = False  # Weiteren Input nach Spielende verhindern
                                 pygame.display.set_caption("SPIELENDE   |   " + activePlayerText + " hat das Spiel gewonnen")  # Titel am Spielende aktualisieren
-                                msgDlg(activePlayerText + " hat das Spiel gewonnen!", title="Schachmatt   |   " + activePlayerText + " gewinnt das Spiel")
+                                print("\n" + activePlayerText + " hat das Spiel gewonnen!")  # , title="Schachmatt   |   " + activePlayerText + " gewinnt das Spiel")
                                 
                             if not checkMate and check:
-                                msgDlg(activePlayerText + ", du stehst im Schach \nSchütze deinen Koenig!", title="SCHACH")  # Ausgabe 'Schach'
+                                print("\n" + activePlayerText + ", du stehst im Schach \nSchütze deinen Koenig!")  # , title="SCHACH")  # Ausgabe 'Schach'
                                 
                             if stalemate:
                                 inputAllowed = False  # Weiteren Input nach Spielende verhindern
                                 pygame.display.set_caption("SPIELENDE   |   Unentschieden")  # Titel am Spielende aktualisieren
-                                msgDlg("Unentschieden!", title="Patt   |   Niemand gewinnt das Spiel")
+                                print("\nUnentschieden!")  # , title="Patt   |   Niemand gewinnt das Spiel")
                                 
                             selectedField = []
                             break
@@ -599,32 +601,38 @@ def figureSelect(x, y):  # Funktion die auf Aufruf des obigen Maus-callbacks auf
                     for f in lastPossibleFields:  # Färben der möglichen Züge
                         fX, fY, fieldTexture, fNumber = f
                         pygame.draw.rect(pygameWindow, (63, 255, 0), (fX - 50 * mScreenW, fY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
-                        figureRepaint()
 
                     for f in rochadeFigurePlace:  # Färben der Felder für König und Turm bei einer Rochade
                         for t in f:
                             if type(t) is tuple:
                                 tX, tY, fieldTexture = t
                                 pygame.draw.rect(pygameWindow, (192, 0, 255), (tX - 50 * mScreenW, tY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
-                                figureRepaint()
 
                     for f in possibleHitFields:
                         fX, fY, fieldTexture, fNumber = f
                         pygame.draw.rect(pygameWindow, (250, 0, 0), (fX - 50 * mScreenW, fY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
-                        figureRepaint()
+
+                    figureRepaint()
 
             index += 1  # Nach einem Schleifendurchlauf wird der Index um 1 erhöht
 
 
-pygame.init()
+def startGame():
+    global pygameWindow
+    global gameStart
+    global inputAllowed
 
-pygameWindow = pygame.display.set_mode((int(800 * mScreenW), int(800 * mScreenH)))  # Feste Fenstergröße, in die das Schachfeld perfekt hinein passt
-gameStart = time.time()  # Zeit des Spielstarts speichern
-repaint()  # Erstes Zeichnen des Spielfeldes
-while inputAllowed:
-    for event in pygame.event.get():
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            x, y = event.pos
-            figureSelect(x, y)
-        if event.type == pygame.QUIT:
-            pygame.quit()
+    pygame.init()
+
+    pygameWindow = pygame.display.set_mode((int(800 * mScreenW), int(800 * mScreenH)))  # Feste Fenstergröße, in die das Schachfeld perfekt hinein passt
+    gameStart = time.time()  # Zeit des Spielstarts speichern
+    repaint()  # Erstes Zeichnen des Spielfeldes
+    while inputAllowed:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = event.pos
+                figureSelect(x, y)
+            if event.type == pygame.QUIT:
+                inputAllowed = False
+
+    pygame.quit()
