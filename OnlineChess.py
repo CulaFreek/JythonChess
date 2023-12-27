@@ -528,6 +528,8 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
         repaint()  # Repainten des Schachfeldes, da sich die Figuren Grafisch bisher noch nicht bewegt haben
 
     if automatic:
+        chessField = [] + lastChessField  # Feld mit der erstellten Kopie überschreiben
+        rochadeMoved = [] + lastRochadeMoved  # Liste mit den bewegten Rochade-Figuren auf Stand vor dem illegalen Zug zurücksetzen
         return sourceField, sourceIndex, moveToField, moveToIndex  # Beim Automatischen durchlaufen die Ursprungsfelder zurückgeben, damit diese nach der automatischen Figur bewegung sich nicht ändern
 
 
