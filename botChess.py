@@ -118,6 +118,7 @@ def search(board, moves):
     for move in moves:
         #TODO: move temporär machen und das resultierende board evaluaten, vllt nur veränderung eval für schnelleren code (check promote true/false)
         value = evaluate(board)
+        #undo move??
         if value > bestValue:
             bestMove = move
             bestValue = value
