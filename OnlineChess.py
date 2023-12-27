@@ -44,6 +44,7 @@ lastPossibleFields = []
 possibleHitFields = []
 schlagenEnPassant = [0, 0, 0]  # [move, sourceField, MoveToField] (move: ZUg in dem der Bauer geschlagen werden könnte)
 sEPHit = []
+rochadeAllowed = True
 rochadeMoved = [False, False, False, False, False, False]  # w_king, w_1_rook, w_2_rook, b_king, b_1_rook, b_2_rook | Falls bereits bewegt -> entsprechender Wert == True
 activePlayer = "white"
 activePlayerText = "Weiss"
@@ -135,6 +136,7 @@ def startClient():  # Funktion zum Starten des Clients / verbinden mit dem Serve
 
 
 def receiveMessages(clientSocket):  # Funktion zum Empfangen von Zügen, sowie dem Spielende
+    global rochadeAllowed
     global inputAllowed
     global quitGame
 
@@ -179,8 +181,10 @@ def receiveMessages(clientSocket):  # Funktion zum Empfangen von Zügen, sowie d
             if activePlayer != playerEnemy:
                 check = checkCheck()  # Überprüfen, ob der König des aktuellen Spielers im Schach steht
                 if check:  # Aufrufen der Schachmatt-funktion nur, wenn ein König im Schach steht
+                    rochadeAllowed = False
                     checkMate = checkCheckMate()
-                if not check:    
+                if not check:
+                    rochadeAllowed = True
                     stalemate = checkStalemate()
                 if checkMate:
                     playerChange()  # Wechseln des Gegners, da für seine Figuren die möglichen Züge ermittelt werden sollen, und seine Figuren die Figuren des aktiven Spielers schlagen könnten
@@ -366,29 +370,30 @@ def possibleKingMoves():  # Funktion zum Ermitteln aller möglichen Bewegungen f
     odd = [-1, -2, -3, -4]  # Indexe große Rochade
     even = [1, 2, 3]  # Indexe kleine Rochade
 
-    for i in [(0, "white"), (3, "black")]:  # [0]: Index in rochadeMoved zum Überprüfen, ob sich der König bereits bewegt hat [1]: Farbe des zu überprüfenden Königs
-        if (not rochadeMoved[i[0]]) and rFigure.startswith(i[1]):  # Falls sich der König noch nicht bewegt hat und die Farbe des Königs mit der Farbe des ausgewählten Königs übereinstimmt
-            r = 0
-            for j in [1, 2, 4, 5]:  # Indexe in rochadeMoved zum Überprüfen, ob sich die Türme, mit denen rochiert werden soll bereits bewegt haben
-                r += 1
-                if r % 2 == 0.0:
-                    evenOddIndex = [] + evenNumbers
-                    evenOrOdd = [] + even
-                else:
-                    evenOddIndex = [] + oddNumbers
-                    evenOrOdd = [] + odd
+    if rochadeAllowed:
+        for i in [(0, "white"), (3, "black")]:  # [0]: Index in rochadeMoved zum Überprüfen, ob sich der König bereits bewegt hat [1]: Farbe des zu überprüfenden Königs
+            if (not rochadeMoved[i[0]]) and rFigure.startswith(i[1]):  # Falls sich der König noch nicht bewegt hat und die Farbe des Königs mit der Farbe des ausgewählten Königs übereinstimmt
+                r = 0
+                for j in [1, 2, 4, 5]:  # Indexe in rochadeMoved zum Überprüfen, ob sich die Türme, mit denen rochiert werden soll bereits bewegt haben
+                    r += 1
+                    if r % 2 == 0.0:
+                        evenOddIndex = [] + evenNumbers
+                        evenOrOdd = [] + even
+                    else:
+                        evenOddIndex = [] + oddNumbers
+                        evenOrOdd = [] + odd
 
-                if (i[0] == 0 and (not rochadeMoved[j]) and j < 3) or (i[0] == 3 and (not rochadeMoved[j]) and j > 3):  # Falls sich der zu überprüfende Turm sich noch nicht bewegt hat
-                    for index in evenOrOdd:
-                        if 64 > rFieldNumber + index - 1 > -1:  # Falls der Index außerhalb des Schachfeldes liegen würde, wird hier abgebrochen, damit ein Error verhindert wird
-                            field = chessField[rFieldNumber + index - 1]
-                            if index == evenOddIndex[3] and field[2] == kingColor + "_" + str(evenOddIndex[2]) + "_rook":  # Falls der letzte Index für die Rochade erreicht wurde und auf dem letzten Feld der Turm steht, der zu Beginn des Spiels auf dem entsprechenden Feld stand
-                                kingField = chessField[rFieldNumber + evenOddIndex[0] - 1]  # Feld auf das der König bei der entsprechenden Rochade zieht
-                                rookField = chessField[rFieldNumber + evenOddIndex[1] - 1]  # Feld auf das der Turm bei der entsprechenden Rochade zieht
-                                rochadeFigurePlace.append((field[1], kingField[1], kingColor + "_king", dirLocation + "chess" + kingColor + "_0.png", kingColor, (kingField[6], kingField[7], kingField[8]), rookField[1], kingColor + "_" + str(evenOddIndex[2]) + "_rook", dirLocation + "chess" + kingColor + "_2.png", kingColor, (rookField[6], rookField[7], rookField[8])))
-                                possibleMoves.append((field[6], field[7], field[8], field[1]))
-                            if field[9] != "":
-                                break
+                    if (i[0] == 0 and (not rochadeMoved[j]) and j < 3) or (i[0] == 3 and (not rochadeMoved[j]) and j > 3):  # Falls sich der zu überprüfende Turm sich noch nicht bewegt hat
+                        for index in evenOrOdd:
+                            if 64 > rFieldNumber + index - 1 > -1:  # Falls der Index außerhalb des Schachfeldes liegen würde, wird hier abgebrochen, damit ein Error verhindert wird
+                                field = chessField[rFieldNumber + index - 1]
+                                if index == evenOddIndex[3] and field[2] == kingColor + "_" + str(evenOddIndex[2]) + "_rook":  # Falls der letzte Index für die Rochade erreicht wurde und auf dem letzten Feld der Turm steht, der zu Beginn des Spiels auf dem entsprechenden Feld stand
+                                    kingField = chessField[rFieldNumber + evenOddIndex[0] - 1]  # Feld auf das der König bei der entsprechenden Rochade zieht
+                                    rookField = chessField[rFieldNumber + evenOddIndex[1] - 1]  # Feld auf das der Turm bei der entsprechenden Rochade zieht
+                                    rochadeFigurePlace.append((field[1], kingField[1], kingColor + "_king", dirLocation + "chess" + kingColor + "_0.png", kingColor, (kingField[6], kingField[7], kingField[8]), rookField[1], kingColor + "_" + str(evenOddIndex[2]) + "_rook", dirLocation + "chess" + kingColor + "_2.png", kingColor, (rookField[6], rookField[7], rookField[8])))
+                                    possibleMoves.append((field[6], field[7], field[8], field[1]))
+                                if field[9] != "":
+                                    break
 
     return possibleMoves, possibleHitFields  # Zurückgeben aller möglichen Bewegungen
 

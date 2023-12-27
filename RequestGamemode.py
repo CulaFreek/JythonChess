@@ -70,7 +70,7 @@ def gamemodeDialog():
     oDR.pack(pady=(20, 5))
     oPR = ttk.Radiobutton(root, text="Spiele online", variable=selectedOption, value=1)
     oPR.pack(pady=5)
-    bER = ttk.Radiobutton(root, text="Spiele gegen KI", variable=selectedOption, value=2)
+    bER = ttk.Radiobutton(root, text="Spiele gegen einen bot", variable=selectedOption, value=2)
     bER.pack(pady=5)
 
     close = ttk.Button(root, text="Spielen", command=getValues)

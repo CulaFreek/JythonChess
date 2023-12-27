@@ -1,9 +1,7 @@
 import Values
-import OneDeviceChess as ODC
+import RequestGamemode as RG
                 
 if __name__ == "__main__":
-
-    import RequestGamemode as RG
 
     chosenGamemode, screenH, screenW = RG.gamemodeDialog()
 
@@ -12,6 +10,7 @@ if __name__ == "__main__":
     Values.screenW = screenW
     
     if chosenGamemode == 0:
+        import OneDeviceChess as ODC
         ODC.startGame()
     if chosenGamemode == 1:
         print(1)
