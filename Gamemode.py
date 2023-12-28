@@ -13,9 +13,8 @@ if __name__ == "__main__":
         import OneDeviceChess as ODC
         ODC.startGame()
     if chosenGamemode == 1:
-        print(1)
-        print(screenH, screenW)
-        #  import OnlineChess as OC
+        import OnlineChess as OC
+        OC.startGame()
     if chosenGamemode == 2:
         print(2)
         print(screenH, screenW)

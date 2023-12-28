@@ -5,6 +5,7 @@ import time
 import threading
 import socket
 import Values
+import pickle
 
 if __name__ == "__main__":
     sys.exit("Starte Gamemode.py, um das Spiel zu starten")
@@ -49,6 +50,9 @@ rochadeMoved = [False, False, False, False, False, False]  # w_king, w_1_rook, w
 activePlayer = "white"
 activePlayerText = "Weiss"
 enemy = "black"
+yourColor = None
+playerEnemy = None
+playerEnemyText = None
 inputAllowed = True
 clientSocket = None
 quitGame = False
@@ -66,13 +70,8 @@ def repaint():  # Neu zeichen des Schachfeldes nach einer Bewegung --->>> Einfac
             else:
                 color = (198, 198, 198)
             pygame.draw.rect(pygameWindow, color, (i * mScreenW, j * mScreenH, 100 * mScreenW, 100 * mScreenH))
-
     figureRepaint()
 
-    elapsedTime = time.time() - gameStart
-    timer = elapsedTime // 60
-
-    pygame.display.set_caption("Aktiver Spieler : " + activePlayerText + "  |    " + str(moves) + "  :  Züge insgesamt --- Spielzeit :  " + str(int(timer)) + " min")  # Nur in Minuten, da Timer nicht fortlaufend, sondern nur bei Aktionen aktualisiert wird
     pygame.display.update()
 
 
@@ -112,17 +111,14 @@ def startClient():  # Funktion zum Starten des Clients / verbinden mit dem Serve
             if time.time() - gameStart <= 10 and not onlineConnection:
                 sys.exit("Es konnte keine Verbindung zum Server hergestellt werden")  # Mitteilung, dass kein Verbindungsaufbau möglich ist
             else:      
-                print("Willkommen! Bitte gib einen Game-Code ein oder erstelle einen neuen \n" + openGames)
+                print("Willkommen! Bitte gib einen Game-Code ein oder erstelle einen neuen \n" + openGames.decode())
                 gameCode = str(input("Gib einen Game-Code ein: "))  # Eingabe des Lobbycodes, des Spiels, dem man beitreten möchte
-                clientSocket.send(gameCode)
+                clientSocket.send(gameCode.encode())
                 
                 gameCreationSuccess = clientSocket.recv(1024)  # Auf Bestätigung des Servers warten
-                print(gameCreationSuccess)
-        
-                receiveThread = threading.Thread(target=receiveMessages, args=(clientSocket,))
-                receiveThread.start()  # Nachrichtenempfangs-Thread starten
+                print(gameCreationSuccess.decode())
                 
-                playerEnemy = clientSocket.recv(1024)  # Gegner-Farbe empfangen
+                playerEnemy = clientSocket.recv(1024).decode()  # Gegner-Farbe empfangen
                 if playerEnemy == "white":
                     yourColor = "Schwarz"
                     playerEnemyText = "Weiss"
@@ -130,6 +126,9 @@ def startClient():  # Funktion zum Starten des Clients / verbinden mit dem Serve
                     yourColor = "Weiss"
                     playerEnemyText = "Schwarz"
                 print("\n -----Du spielst " + yourColor + "-----\n")
+                
+                receiveThread = threading.Thread(target=receiveMessages, args=(clientSocket,))
+                receiveThread.start()  # Nachrichtenempfangs-Thread starten
                     
         except Exception as e:
             print(e)
@@ -148,7 +147,7 @@ def receiveMessages(clientSocket):  # Funktion zum Empfangen von Zügen, sowie d
             if not data:  # Falls kein Zug gemacht wurde, ist der Inhalt der Nachricht 'None'. Nur nicht 'None'-Nachrichten weiter verarbeiten, sonst Fehlermeldung
                 break
             
-            if data == "Mitspieler left game":  # Falls der Mitspieler das Spiel verlässt
+            if data == b"Mitspieler left game":  # Falls der Mitspieler das Spiel verlässt
                 if not quitGame:
                     quitGame = bool(input("\nDein Mitspieler hat das Spiel verlassen! \nMöchtest du das Spiel schließen - ein Reconnect ist nicht möglich, zum spielen Programm neustarten!: "))
                 if quitGame:
@@ -160,20 +159,20 @@ def receiveMessages(clientSocket):  # Funktion zum Empfangen von Zügen, sowie d
                     quitGame = True
                     break
 
-            if data == "You Won":  # Nachricht, die Erhalten wird, wenn der Gegner verliert
+            if data == b"You Won":  # Nachricht, die Erhalten wird, wenn der Gegner verliert
                 pygame.display.set_caption("SPIELENDE   |   " + yourColor + " hat das Spiel gewonnen")  # Titel am Spielende aktualisieren
                 print("\n" + yourColor + " hat das Spiel gewonnen!")  # , title="Schachmatt   |   " + yourColor + " gewinnt das Spiel")
                 inputAllowed = False
                 break
             
-            if data == "Draw":  # Nachricht, die Erhalten wird, wenn es zu einem Unentschieden kommt
+            if data == b"Draw":  # Nachricht, die Erhalten wird, wenn es zu einem Unentschieden kommt
                 pygame.display.set_caption("SPIELENDE   |   Unentschieden")  # Titel am Spielende aktualisieren
                 print("\nUnentschieden!")  # , title="Patt   |   Niemand gewinnt das Spiel")
                 inputAllowed = False
                 break
-            
-            stripedData = data[1:-1].split(',')  # Nachrichtenformat: (x, y) ! Kein Tupel Format: Unicode! Nachricht entsprechend nach x und y teilen
-            sField, mField = int(stripedData[0]), int(stripedData[1])
+
+            receivedTuple = pickle.loads(data)
+            sField, mField = int(receivedTuple[0]), int(receivedTuple[1])
             figureMove(sField, mField)  # Erhaltene Bewegung umsetzen
             decolor()  # Entfärben aller Felder sowie leeren der dazugehörigen Listen
             playerChange()
@@ -188,10 +187,9 @@ def receiveMessages(clientSocket):  # Funktion zum Empfangen von Zügen, sowie d
                     stalemate = checkStalemate()
                 if checkMate:
                     playerChange()  # Wechseln des Gegners, da für seine Figuren die möglichen Züge ermittelt werden sollen, und seine Figuren die Figuren des aktiven Spielers schlagen könnten
-                    
                     inputAllowed = False  # Weiteren Input nach Spielende verhindern
                     pygame.display.set_caption("SPIELENDE   |   " + playerEnemyText + " hat das Spiel gewonnen")  # Titel am Spielende aktualisieren
-                    clientSocket.send("You Won")
+                    clientSocket.send("You Won".encode())
                     print("\n" + playerEnemyText + " hat das Spiel gewonnen!")  # , title="Schachmatt   |   " + playerEnemyText + " gewinnt das Spiel")
                     break
                     
@@ -201,10 +199,9 @@ def receiveMessages(clientSocket):  # Funktion zum Empfangen von Zügen, sowie d
                 if stalemate:
                     inputAllowed = False  # Weiteren Input nach Spielende verhindern
                     pygame.display.set_caption("SPIELENDE   |   Unentschieden")  # Titel am Spielende aktualisieren
-                    clientSocket.send("Draw")
+                    clientSocket.send("Draw".encode())
                     print("\nUnentschieden!")  # , title="Patt   |   Niemand gewinnt das Spiel")
                     break
-
     except Exception as e:
         print("Fehler beim Erhalten der Nachrichten: {}".format(e))
 
@@ -212,6 +209,7 @@ def receiveMessages(clientSocket):  # Funktion zum Empfangen von Zügen, sowie d
 def closeGame():  # Funktion zum Schließen des Client-Sockets, damit die Spiele-lobbys richtig geschlossen werden
     global quitGame
     global inputAllowed
+    global clientSocket
     
     if quitGame:
         close = bool(input("Möchtest du das Spiel wirklich verlassen? \nDein Mitspieler hat das Spiel bereits verlassen! ('True' oder 'False'): "))
@@ -222,7 +220,7 @@ def closeGame():  # Funktion zum Schließen des Client-Sockets, damit die Spiele
         close = bool(input("Möchtest du das Spiel wirklich verlassen? ('True' oder 'False'): "))
         if close:
             quitGame = True
-            clientSocket.send("Mitspieler left game")
+            clientSocket.send("Mitspieler left game".encode())
 
 
 def possiblePawnMoves():  # Funktion die alle möglichen Bewegungen für den ausgewählten Bauern zurückgibt
@@ -521,11 +519,7 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
         return check
 
     if not automatic and not illegalMoveTest:  # Bei automatischem Programmdurchlauf würden im folgendem weitere automatische Programmdurchläufe entstehen
-
-        playerChange()  # Spielerwechsel mit Spieler text, enemy und Zug counter
         moves += 1
-
-        repaint()  # Repainten des Schachfeldes, da sich die Figuren Grafisch bisher noch nicht bewegt haben
 
     if automatic:
         chessField = [] + lastChessField  # Feld mit der erstellten Kopie überschreiben
@@ -662,7 +656,7 @@ def figureSelect(posX, posY):  # Funktion die auf Aufruf des obigen Maus-callbac
     global rochadeFigurePlace
 
     index = 0
-    if inputAllowed:  # Solange True, bis ein König fällt
+    if inputAllowed and playerEnemy != activePlayer:  # Solange True, bis ein König fällt
         for largeTuple in chessField:  # Durchgehen jedes Feldes bis ein Feld mit den angeklickten Koordinaten übereinstimmt, auf diesem werden dann die weiteren Schritte ausgeführt
             moved = False
             fieldKey, fieldNumber, figure, figureTexture, leftX, yAbove, centerX, centerY, fieldTexture, figureColor, colum, row = largeTuple  # Entpacken des Schachfeld Tupels
@@ -672,67 +666,68 @@ def figureSelect(posX, posY):  # Funktion die auf Aufruf des obigen Maus-callbac
                     for possibleField in lastPossibleFields: 
                         if centerX == possibleField[0] and centerY == possibleField[1]:  # Falls die Center mit den Centern des aktuellen Feldes übereinstimmen
                             moved = True
-                            clientSocket.send((selectedField[1], index))  # Senden der Bewegung an den Server, damit beide Clients ihre Spielfelder updaten
+                            dataToSend = pickle.dumps((selectedField[1], index))
+                            clientSocket.send(dataToSend)  # Senden der Bewegung an den Server, damit beide Clients ihre Spielfelder updaten
                             selectedField = []
                             break
 
-                    if moved:
-                        break  # Keine andere Möglichkeit gefunden | Schleife muss im if Fall sofort abgebrochen werden, da es sonst zu verheerenden Fehlern kommen kann
-                    if figure != "" and figureColor == activePlayer:  # Falls das angeklickte Feld nicht leer und die Figurenfarbe mit dem aktiven Spieler übereinstimmt
-                        decolor()
-                        selectedField.append((centerX, centerY, fieldTexture, figure, fieldNumber, colum, row))  # Nach leeren und entfärben wird hier die neu ausgewählte Figur aufgenommen
-                        selectedField.append(index)  # Speichern des Indexes des ausgewählten Feldes | Wichtig für die move Funktion
-                        pygame.draw.rect(pygameWindow, (173, 216, 230), (centerX - 50 * mScreenW, centerY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
-                        figureRepaint()
+                if moved:
+                    break  # Keine andere Möglichkeit gefunden | Schleife muss im if Fall sofort abgebrochen werden, da es sonst zu verheerenden Fehlern kommen kann
+                if figure != "" and figureColor == activePlayer:  # Falls das angeklickte Feld nicht leer und die Figurenfarbe mit dem aktiven Spieler übereinstimmt
+                    decolor()
+                    selectedField.append((centerX, centerY, fieldTexture, figure, fieldNumber, colum, row))  # Nach leeren und entfärben wird hier die neu ausgewählte Figur aufgenommen
+                    selectedField.append(index)  # Speichern des Indexes des ausgewählten Feldes | Wichtig für die move Funktion
+                    pygame.draw.rect(pygameWindow, (173, 216, 230), (centerX - 50 * mScreenW, centerY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
+                    figureRepaint()
 
-                        lastPossibleFields, possibleHitFields = checkFigureType(figure)  # Funktionsaufrufe je nach ausgewählter Figur
-                        newPossibleMoves = []
-                        for largeT in lastPossibleFields:  # Für jedes possible Field wird geguckt, ob der Zug legal wäre, wenn nicht, wird das Feld nicht zur neuen Liste hinzugefügt, die die Alte dann ersetzt
-                            selectedCopy = [] + selectedField  # Copy von selectedField, da dieses sich ändert und sonst nichts mehr funktioniert
-                            figureHitCopy = [] + possibleHitFields
-                            rochadeCopy = [] + rochadeFigurePlace
+                    lastPossibleFields, possibleHitFields = checkFigureType(figure)  # Funktionsaufrufe je nach ausgewählter Figur
+                    newPossibleMoves = []
+                    for largeT in lastPossibleFields:  # Für jedes possible Field wird geguckt, ob der Zug legal wäre, wenn nicht, wird das Feld nicht zur neuen Liste hinzugefügt, die die Alte dann ersetzt
+                        selectedCopy = [] + selectedField  # Copy von selectedField, da dieses sich ändert und sonst nichts mehr funktioniert
+                        figureHitCopy = [] + possibleHitFields
+                        rochadeCopy = [] + rochadeFigurePlace
 
-                            check = figureMove(selectedField[1], largeT[3] - 1, False, True)  # Hier wird die legalität des möglichen Zuges überprüft
+                        check = figureMove(selectedField[1], largeT[3] - 1, False, True)  # Hier wird die legalität des möglichen Zuges überprüft
 
-                            selectedField = [] + selectedCopy  # selectedField mit der erzeugten Kopie überschreiben
-                            possibleHitFields = [] + figureHitCopy
-                            rochadeFigurePlace = [] + rochadeCopy
+                        selectedField = [] + selectedCopy  # selectedField mit der erzeugten Kopie überschreiben
+                        possibleHitFields = [] + figureHitCopy
+                        rochadeFigurePlace = [] + rochadeCopy
 
-                            if not check:  # Falls der mögliche Zug nicht illegal ist, wird er zu den neuen möglichen Zügen hinzugefügt
-                                newPossibleMoves.append(largeT)
-                        lastPossibleFields = [] + newPossibleMoves  # Überschreiben der Liste mit den möglichen Feldern, mit den möglichen legalen Feldern
+                        if not check:  # Falls der mögliche Zug nicht illegal ist, wird er zu den neuen möglichen Zügen hinzugefügt
+                            newPossibleMoves.append(largeT)
+                    lastPossibleFields = [] + newPossibleMoves  # Überschreiben der Liste mit den möglichen Feldern, mit den möglichen legalen Feldern
 
-                        newHitFields = []
-                        for f in possibleHitFields:  # Überprüfen, ob eine Schlagmöglichkeit soeben als illegal erkannt wurde, falls dies der Fall ist MUSS dieses Feld aus figure_hit_field entfernt sein
-                            for i in lastPossibleFields:
-                                if f == i:  # Falls das Hit-field noch in den möglichen ist, wird es der neuen Liste hinzugefügt
-                                    newHitFields.append(f)
-                        possibleHitFields = [] + newHitFields  # Überschreiben der alten möglichen Schläge mit den möglichen legalen Schlägen
+                    newHitFields = []
+                    for f in possibleHitFields:  # Überprüfen, ob eine Schlagmöglichkeit soeben als illegal erkannt wurde, falls dies der Fall ist MUSS dieses Feld aus figure_hit_field entfernt sein
+                        for i in lastPossibleFields:
+                            if f == i:  # Falls das Hit-field noch in den möglichen ist, wird es der neuen Liste hinzugefügt
+                                newHitFields.append(f)
+                    possibleHitFields = [] + newHitFields  # Überschreiben der alten möglichen Schläge mit den möglichen legalen Schlägen
 
-                        newRochadeFields = []
-                        for f in rochadeFigurePlace:
-                            for i in lastPossibleFields:
-                                if f[0] == i[3]:  # Wenn die Feldnummern übereinstimmen
-                                    newRochadeFields.append(f)
-                        rochadeFigurePlace = [] + newRochadeFields
+                    newRochadeFields = []
+                    for f in rochadeFigurePlace:
+                        for i in lastPossibleFields:
+                            if f[0] == i[3]:  # Wenn die Feldnummern übereinstimmen
+                                newRochadeFields.append(f)
+                    rochadeFigurePlace = [] + newRochadeFields
 
-                        for f in lastPossibleFields:  # Färben der möglichen Züge
-                            fX, fY, fieldTexture, fNumber = f
-                            pygame.draw.rect(pygameWindow, (63, 255, 0), (fX - 50 * mScreenW, fY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
+                    for f in lastPossibleFields:  # Färben der möglichen Züge
+                        fX, fY, fieldTexture, fNumber = f
+                        pygame.draw.rect(pygameWindow, (63, 255, 0), (fX - 50 * mScreenW, fY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
 
-                        for f in rochadeFigurePlace:  # Färben der Felder für König und Turm bei einer Rochade
-                            for t in f:
-                                if type(t) is tuple:
-                                    tX, tY, fieldTexture = t
-                                    pygame.draw.rect(pygameWindow, (192, 0, 255), (tX - 50 * mScreenW, tY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
+                    for f in rochadeFigurePlace:  # Färben der Felder für König und Turm bei einer Rochade
+                        for t in f:
+                            if type(t) is tuple:
+                                tX, tY, fieldTexture = t
+                                pygame.draw.rect(pygameWindow, (192, 0, 255), (tX - 50 * mScreenW, tY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
 
-                        for f in possibleHitFields:
-                            fX, fY, fieldTexture, fNumber = f
-                            pygame.draw.rect(pygameWindow, (250, 0, 0), (fX - 50 * mScreenW, fY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
+                    for f in possibleHitFields:
+                        fX, fY, fieldTexture, fNumber = f
+                        pygame.draw.rect(pygameWindow, (250, 0, 0), (fX - 50 * mScreenW, fY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
 
-                        figureRepaint()
+                    figureRepaint()
 
-                index += 1  # Nach einem Schleifendurchlauf wird der Index um 1 erhöht
+            index += 1  # Nach einem Schleifendurchlauf wird der Index um 1 erhöht
 
 
 def startGame():
@@ -743,6 +738,7 @@ def startGame():
     pygame.init()
 
     pygameWindow = pygame.display.set_mode((int(800 * mScreenW), int(800 * mScreenH)))  # Feste Fenstergröße, in die das Schachfeld perfekt hinein passt
+    pygame.display.set_caption("Python-Online-Schach auf jythonchess.de")
 
     gameStart = time.time()  # Zeit des Spielstarts speichern
     startClient()
