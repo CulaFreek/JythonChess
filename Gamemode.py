@@ -11,11 +11,10 @@ if __name__ == "__main__":
     
     if chosenGamemode == 0:
         import OneDeviceChess as ODC
-        ODC.startGame()
+        ODC.startGame(False)
     if chosenGamemode == 1:
         import OnlineChess as OC
         OC.startGame()
     if chosenGamemode == 2:
-        print(2)
-        print(screenH, screenW)
-        #  import botChess as BC
+        import OneDeviceChess as ODC
+        ODC.startGame(True)

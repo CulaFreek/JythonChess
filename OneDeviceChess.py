@@ -390,9 +390,7 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
         repaint()  # Repainten des Schachfeldes, da sich die Figuren Grafisch bisher noch nicht bewegt haben
     
     if automatic:
-        chessField = [] + lastChessField  # Feld mit der erstellten Kopie überschreiben
-        rochadeMoved = [] + lastRochadeMoved  # Liste mit den bewegten Rochade-Figuren auf Stand vor dem illegalen Zug zurücksetzen
-        return sourceField, sourceIndex, moveToField, moveToIndex  # Beim Automatischen durchlaufen die Ursprungsfelder zurückgeben, damit diese nach der automatischen Figur bewegung sich nicht ändern
+        return lastChessField, lastRochadeMoved  # Beim Automatischen durchlaufen die Ursprungsfelder zurückgeben, damit diese nach der automatischen Figur bewegung sich nicht ändern
 
 
 def decolor():  # Funktion zum Entfärben der gefärbten Felder
@@ -430,6 +428,8 @@ def checkCheck():  # Funktion zum Überprüfen, ob der König im Schach steht
          
 def checkCheckMate():  # Funktion zum Überprüfen, ob ein Spieler Schachmatt ist. (Wird nur aufgerufen, falls ein König im Schach steht)
     global selectedField
+    global chessField
+    global rochadeMoved
     
     check = True
     runde = 0
@@ -442,10 +442,10 @@ def checkCheckMate():  # Funktion zum Überprüfen, ob ein Spieler Schachmatt is
                 for largeTuple in chessField:
                     if possibleField[0] == largeTuple[6] and possibleField[1] == largeTuple[7]:
                         lSelectedField = [(largeTuple[6], largeTuple[7], largeTuple[8], largeTuple[2], largeTuple[1], largeTuple[10], largeTuple[11]), runde]  # Neue Werte des Feldes zuweisen, wichtig da sonst die Überprüfung der Möglichen bewegungen der Figuren nicht funktioniert
-                        sourceField, sourceIndex, moveToField, moveToIndex = figureMove(lSelectedField[1], lRunde, True)
+                        lastChessField, lastRochadeMoved = figureMove(lSelectedField[1], lRunde, True)
                         check = checkCheck()  # Prüfen, ob König noch im Schach steht. Wenn nicht, wird die Funktion abgebrochen
-                        chessField[sourceIndex] = sourceField  # Zurücksetzen der Figuren auf ihre Ursprungsfelder
-                        chessField[moveToIndex] = moveToField
+                        chessField = [] + lastChessField  # Zurücksetzen der Figuren auf ihre Ursprungsfelder
+                        rochadeMoved = [] + lastRochadeMoved
                         
                         kingGetter()  # Ermitteln, auf welchen Feldern die Könige stehen, da diese möglicherweise bewegt wurden
                         
@@ -624,7 +624,8 @@ def figureSelect(posX, posY):  # Funktion die auf Aufruf des obigen Maus-callbac
             index += 1  # Nach einem Schleifendurchlauf wird der Index um 1 erhöht
 
 
-def startGame():
+def startGame(bot):
+    import botChess as BC
     global pygameWindow
     global gameStart
     global inputAllowed
@@ -634,12 +635,25 @@ def startGame():
     pygameWindow = pygame.display.set_mode((800 * mScreenW, 800 * mScreenH))  # Feste Fenstergröße, in die das Schachfeld perfekt hinein passt
     gameStart = time.time()  # Zeit des Spielstarts speichern
     repaint()  # Erstes Zeichnen des Spielfeldes
-    while inputAllowed:
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = event.pos
-                figureSelect(x, y)
-            if event.type == pygame.QUIT:
-                inputAllowed = False
+    if bot:
+        while inputAllowed:
+            if activePlayer == "white":
+                for event in pygame.event.get():
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        x, y = event.pos
+                        figureSelect(x, y)
+                    if event.type == pygame.QUIT:
+                        inputAllowed = False
+            else:
+                BC.getMove()
+
+    else:
+        while inputAllowed:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = event.pos
+                    figureSelect(x, y)
+                if event.type == pygame.QUIT:
+                    inputAllowed = False
 
     pygame.quit()

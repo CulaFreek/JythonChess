@@ -148,25 +148,23 @@ def receiveMessages(clientSocket):  # Funktion zum Empfangen von Zügen, sowie d
                 break
             
             if data == b"Mitspieler left game":  # Falls der Mitspieler das Spiel verlässt
+                inputAllowed = False
                 if not quitGame:
                     quitGame = bool(input("\nDein Mitspieler hat das Spiel verlassen! \nMöchtest du das Spiel schließen - ein Reconnect ist nicht möglich, zum spielen Programm neustarten!: "))
                 if quitGame:
                     print("Spiel verlassen")
-                    inputAllowed = False
                     clientSocket.close()
                     sys.exit("Spiel geschlossen!")
                 else:
-                    quitGame = True
+                    quitGame = True  # Vermeiden eines Fehlers, durch den das Spiel im Folgenden nicht mehr geschlossen werden könnte
                     break
 
             if data == b"You Won":  # Nachricht, die Erhalten wird, wenn der Gegner verliert
-                pygame.display.set_caption("SPIELENDE   |   " + yourColor + " hat das Spiel gewonnen")  # Titel am Spielende aktualisieren
                 print("\n" + yourColor + " hat das Spiel gewonnen!")  # , title="Schachmatt   |   " + yourColor + " gewinnt das Spiel")
                 inputAllowed = False
                 break
             
             if data == b"Draw":  # Nachricht, die Erhalten wird, wenn es zu einem Unentschieden kommt
-                pygame.display.set_caption("SPIELENDE   |   Unentschieden")  # Titel am Spielende aktualisieren
                 print("\nUnentschieden!")  # , title="Patt   |   Niemand gewinnt das Spiel")
                 inputAllowed = False
                 break
@@ -188,7 +186,6 @@ def receiveMessages(clientSocket):  # Funktion zum Empfangen von Zügen, sowie d
                 if checkMate:
                     playerChange()  # Wechseln des Gegners, da für seine Figuren die möglichen Züge ermittelt werden sollen, und seine Figuren die Figuren des aktiven Spielers schlagen könnten
                     inputAllowed = False  # Weiteren Input nach Spielende verhindern
-                    pygame.display.set_caption("SPIELENDE   |   " + playerEnemyText + " hat das Spiel gewonnen")  # Titel am Spielende aktualisieren
                     clientSocket.send("You Won".encode())
                     print("\n" + playerEnemyText + " hat das Spiel gewonnen!")  # , title="Schachmatt   |   " + playerEnemyText + " gewinnt das Spiel")
                     break
@@ -198,10 +195,10 @@ def receiveMessages(clientSocket):  # Funktion zum Empfangen von Zügen, sowie d
                     
                 if stalemate:
                     inputAllowed = False  # Weiteren Input nach Spielende verhindern
-                    pygame.display.set_caption("SPIELENDE   |   Unentschieden")  # Titel am Spielende aktualisieren
                     clientSocket.send("Draw".encode())
                     print("\nUnentschieden!")  # , title="Patt   |   Niemand gewinnt das Spiel")
                     break
+
     except Exception as e:
         print("Fehler beim Erhalten der Nachrichten: {}".format(e))
 
@@ -430,33 +427,32 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
                 schlagenEnPassant = [moves + 1, sFieldNumber + 8, mFieldNumber]
 
             if (mColum == 1 and sFigure.startswith("white")) or (mColum == 8 and sFigure.startswith("black")):  # Falls ein Bauer sich auf die gegnerische letzte Linie begibt, tauscht er seinen Bauern gegen einen Turm, Pferd, Läufer oder eine Dame ein
-                sure = False
                 sFigure = ""
-                while not sure or sFigure == "":
-                    eFigure = int(input("\nBauern ersetzen durch '1' Turm, '2' Pferd, '3' Läufer, '4' Dame: "))  # Leider hier UI-technisch sehr unschön, ging aber leider nicht anders, da TigerJython auf Maus Callbacks anscheinend Fenster erstellen, diese aber nicht mehr mit Inhalt füllen kann
+                while sFigure == "":
+                    if playerEnemy != activePlayer:
+                        eFigure = int(input("\nBauern ersetzen durch '1' Turm, '2' Pferd, '3' Läufer, '4' Dame: "))  # Leider hier UI-technisch sehr unschön, ging aber leider nicht anders, da TigerJython auf Maus Callbacks anscheinend Fenster erstellen, diese aber nicht mehr mit Inhalt füllen kann
+                        clientSocket.send(str(eFigure).encode())
+
+                    eFigure = int(clientSocket.recv(1024).decode())
+
                     if eFigure == 1:
-                        output = "Turm"
                         eFigure = "_rook"
                         eFigureTexture = "_2.svg"
                     elif eFigure == 2:
-                        output = "Pferd"
                         eFigure = "_knight"
                         eFigureTexture = "_3.svg"
                     elif eFigure == 3:
-                        output = "Läufer"
+
                         eFigure = "_bishop"
                         eFigureTexture = "_4.svg"
                     elif eFigure == 4:
-                        output = "Dame"
                         eFigure = "_queen"
                         eFigureTexture = "_1.svg"
                     else:
-                        continue  # Hier ein else mit contínue, um den restlichen Schleifendurchlauf, also die 'sure' Zuweisung mit der Frage zu überspringen, da eine Zahl eingegeben wurde, der keine Figur zugeordnet ist
+                        continue  # Hier ein else mit contínue, um den restlichen Schleifendurchlauf zu überspringen, da eine Zahl eingegeben wurde der keine Figur zugeordnet ist
 
                     sFigure = sFigureColor + eFigure
                     sFigureTexture = dirLocation + "chess" + sFigureColor + eFigureTexture
-
-                    sure = bool(input("\nMöchtest du deinen Bauern wirklich durch eine*n " + output + " ersetzen? \n'True' oder 'False': "))
 
         if sFigure.endswith("king"):  # Deaktivieren der Rochade-Möglichkeit für die entsprechende Figur, falls sich diese bewegt
             if sFigure.startswith("white"):
@@ -522,9 +518,7 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
         moves += 1
 
     if automatic:
-        chessField = [] + lastChessField  # Feld mit der erstellten Kopie überschreiben
-        rochadeMoved = [] + lastRochadeMoved  # Liste mit den bewegten Rochade-Figuren auf Stand vor dem illegalen Zug zurücksetzen
-        return sourceField, sourceIndex, moveToField, moveToIndex  # Beim Automatischen durchlaufen die Ursprungsfelder zurückgeben, damit diese nach der automatischen Figur bewegung sich nicht ändern
+        return lastChessField, lastRochadeMoved  # Beim Automatischen durchlaufen die Ursprungsfelder zurückgeben, damit diese nach der automatischen Figur bewegung sich nicht ändern
 
 
 def decolor():  # Funktion zum Entfärben der gefärbten Felder
@@ -562,6 +556,8 @@ def checkCheck():  # Funktion zum Überprüfen, ob der König im Schach steht
 
 def checkCheckMate():  # Funktion zum Überprüfen, ob ein Spieler Schachmatt ist. (Wird nur aufgerufen, falls ein König im Schach steht)
     global selectedField
+    global chessField
+    global rochadeMoved
 
     check = True
     runde = 0
@@ -574,10 +570,10 @@ def checkCheckMate():  # Funktion zum Überprüfen, ob ein Spieler Schachmatt is
                 for largeTuple in chessField:
                     if possibleField[0] == largeTuple[6] and possibleField[1] == largeTuple[7]:
                         lSelectedField = [(largeTuple[6], largeTuple[7], largeTuple[8], largeTuple[2], largeTuple[1], largeTuple[10], largeTuple[11]), runde]  # Neue Werte des Feldes zuweisen, wichtig da sonst die Überprüfung der Möglichen bewegungen der Figuren nicht funktioniert
-                        sourceField, sourceIndex, moveToField, moveToIndex = figureMove(lSelectedField[1], lRunde, True)
+                        lastChessField, lastRochadeMoved = figureMove(lSelectedField[1], lRunde, True)
                         check = checkCheck()  # Prüfen, ob König noch im Schach steht. Wenn nicht, wird die Funktion abgebrochen
-                        chessField[sourceIndex] = sourceField  # Zurücksetzen der Figuren auf ihre Ursprungsfelder
-                        chessField[moveToIndex] = moveToField
+                        chessField = [] + lastChessField  # Zurücksetzen der Figuren auf ihre Ursprungsfelder
+                        rochadeMoved = [] + lastRochadeMoved
 
                         kingGetter()  # Ermitteln, auf welchen Feldern die Könige stehen, da diese möglicherweise bewegt wurden
 
