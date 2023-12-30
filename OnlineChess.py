@@ -6,6 +6,8 @@ import threading
 import socket
 import Values
 import pickle
+import tkinter
+from tkinter import ttk
 
 if __name__ == "__main__":
     sys.exit("Starte Gamemode.py, um das Spiel zu starten")
@@ -50,14 +52,14 @@ rochadeMoved = [False, False, False, False, False, False]  # w_king, w_1_rook, w
 activePlayer = "white"
 activePlayerText = "Weiss"
 enemy = "black"
-yourColor = None
-playerEnemy = None
-playerEnemyText = None
+yourColor = "white"
+playerEnemy = "black"
+playerEnemyText = "Schwarz"
 inputAllowed = True
-clientSocket = None
 quitGame = False
 onlineConnection = False
 moves = 0
+returnValue = None
 
 
 def repaint():  # Neu zeichen des Schachfeldes nach einer Bewegung --->>> Einfachste Möglichkeit Figur texturen wieder vom Feld zu entfernen
@@ -110,13 +112,12 @@ def startClient():  # Funktion zum Starten des Clients / verbinden mit dem Serve
                 
             if time.time() - gameStart <= 10 and not onlineConnection:
                 sys.exit("Es konnte keine Verbindung zum Server hergestellt werden")  # Mitteilung, dass kein Verbindungsaufbau möglich ist
-            else:      
-                print("Willkommen! Bitte gib einen Game-Code ein oder erstelle einen neuen \n" + openGames.decode())
-                gameCode = str(input("Gib einen Game-Code ein: "))  # Eingabe des Lobbycodes, des Spiels, dem man beitreten möchte
+            else:
+                gameCode = informationDialog("Gib deinen Spielcode ein", "Willkommen! \n\nBitte gib einen Game-Code ein oder erstelle einen neuen \n" + openGames.decode(), "Gib einen Game-Code ein: ", True)
                 clientSocket.send(gameCode.encode())
                 
                 gameCreationSuccess = clientSocket.recv(1024)  # Auf Bestätigung des Servers warten
-                print(gameCreationSuccess.decode())
+                informationDialog("Erfolgreiche Spielerstellung", gameCreationSuccess.decode())
                 
                 playerEnemy = clientSocket.recv(1024).decode()  # Gegner-Farbe empfangen
                 if playerEnemy == "white":
@@ -125,16 +126,16 @@ def startClient():  # Funktion zum Starten des Clients / verbinden mit dem Serve
                 else:
                     yourColor = "Weiss"
                     playerEnemyText = "Schwarz"
-                print("\n -----Du spielst " + yourColor + "-----\n")
+                informationDialog("Spiel Information", "--> Du spielst " + yourColor + " <--")
                 
                 receiveThread = threading.Thread(target=receiveMessages, args=(clientSocket,))
                 receiveThread.start()  # Nachrichtenempfangs-Thread starten
                     
         except Exception as e:
-            print(e)
+            informationDialog("ERROR", "Fehler: {}".format(e))
 
 
-def receiveMessages(clientSocket):  # Funktion zum Empfangen von Zügen, sowie dem Spielende
+def receiveMessages(cSocket):  # Funktion zum Empfangen von Zügen, sowie dem Spielende
     global rochadeAllowed
     global inputAllowed
     global quitGame
@@ -143,29 +144,29 @@ def receiveMessages(clientSocket):  # Funktion zum Empfangen von Zügen, sowie d
         while True:  # Muss durchgängig laufen, da zu jedem Zeitpunkt Bewegungen empfangen werden müssen
             checkMate = False
             stalemate = False
-            data = clientSocket.recv(1024)  # Empfangen der Nachricht
+            data = cSocket.recv(1024)  # Empfangen der Nachricht
             if not data:  # Falls kein Zug gemacht wurde, ist der Inhalt der Nachricht 'None'. Nur nicht 'None'-Nachrichten weiter verarbeiten, sonst Fehlermeldung
                 break
             
             if data == b"Mitspieler left game":  # Falls der Mitspieler das Spiel verlässt
                 inputAllowed = False
                 if not quitGame:
-                    quitGame = bool(input("\nDein Mitspieler hat das Spiel verlassen! \nMöchtest du das Spiel schließen - ein Reconnect ist nicht möglich, zum spielen Programm neustarten!: "))
+                    informationDialog("Dein Mitspieler hat das Spiel verlassen", "Dein Mitspieler hat das Spiel verlassen!", "Möchtest du das Spiel schließen - ein Reconnect ist nicht möglich, zum spielen Programm neustarten!: ", True)
                 if quitGame:
-                    print("Spiel verlassen")
-                    clientSocket.close()
+                    informationDialog("Spiel verlassen!", "Du hast das Spiel verlassen")
+                    cSocket.close()
                     sys.exit("Spiel geschlossen!")
                 else:
                     quitGame = True  # Vermeiden eines Fehlers, durch den das Spiel im Folgenden nicht mehr geschlossen werden könnte
                     break
 
             if data == b"You Won":  # Nachricht, die Erhalten wird, wenn der Gegner verliert
-                print("\n" + yourColor + " hat das Spiel gewonnen!")  # , title="Schachmatt   |   " + yourColor + " gewinnt das Spiel")
+                informationDialog("Schachmatt   |   " + yourColor + " gewinnt das Spiel", yourColor + " hat das Spiel gewonnen!")
                 inputAllowed = False
                 break
             
             if data == b"Draw":  # Nachricht, die Erhalten wird, wenn es zu einem Unentschieden kommt
-                print("\nUnentschieden!")  # , title="Patt   |   Niemand gewinnt das Spiel")
+                informationDialog("Patt   |   Niemand gewinnt das Spiel", "Unentschieden")
                 inputAllowed = False
                 break
 
@@ -186,21 +187,21 @@ def receiveMessages(clientSocket):  # Funktion zum Empfangen von Zügen, sowie d
                 if checkMate:
                     playerChange()  # Wechseln des Gegners, da für seine Figuren die möglichen Züge ermittelt werden sollen, und seine Figuren die Figuren des aktiven Spielers schlagen könnten
                     inputAllowed = False  # Weiteren Input nach Spielende verhindern
-                    clientSocket.send("You Won".encode())
-                    print("\n" + playerEnemyText + " hat das Spiel gewonnen!")  # , title="Schachmatt   |   " + playerEnemyText + " gewinnt das Spiel")
+                    cSocket.send("You Won".encode())
+                    informationDialog("Schachmatt   |   " + playerEnemyText + " gewinnt das Spiel", playerEnemyText + " hat das Spiel gewonnen!")
                     break
                     
                 if not checkMate and check:
-                    print("\nDu stehst im Schach \nSchütze deinen Koenig!")  # , title="SCHACH")  # Ausgabe 'Schach'
+                    informationDialog("SCHACH", "Du stehst im Schach\nSchütze deinen König!")
                     
                 if stalemate:
                     inputAllowed = False  # Weiteren Input nach Spielende verhindern
-                    clientSocket.send("Draw".encode())
-                    print("\nUnentschieden!")  # , title="Patt   |   Niemand gewinnt das Spiel")
+                    cSocket.send("Draw".encode())
+                    informationDialog("Patt   |   Niemand gewinnt das Spiel", "Unentschieden")
                     break
 
     except Exception as e:
-        print("Fehler beim Erhalten der Nachrichten: {}".format(e))
+        informationDialog("ERROR", "Fehler beim Erhalten der Nachrichten: {}".format(e))
 
 
 def closeGame():  # Funktion zum Schließen des Client-Sockets, damit die Spiele-lobbys richtig geschlossen werden
@@ -209,15 +210,54 @@ def closeGame():  # Funktion zum Schließen des Client-Sockets, damit die Spiele
     global clientSocket
     
     if quitGame:
-        close = bool(input("Möchtest du das Spiel wirklich verlassen? \nDein Mitspieler hat das Spiel bereits verlassen! ('True' oder 'False'): "))
+        close = informationDialog("Spiel verlassen?", "Dein Mitspieler hat das Spiel bereits verlassen!", "Möchtest du das Spiel wirklich verlassen? ('True' oder 'False'): ", True)
         if close:
-            print("Spiel verlassen")
+            informationDialog("Spiel verlassen", "Spiel verlassen!")
             inputAllowed = False
     else:
-        close = bool(input("Möchtest du das Spiel wirklich verlassen? ('True' oder 'False'): "))
+        close = informationDialog("Spiel verlassen?", "", "Möchtest du das Spiel wirklich verlassen? ('True' oder 'False'): ", True)
         if close:
             quitGame = True
             clientSocket.send("Mitspieler left game".encode())
+
+
+def informationDialog(title, text, inputStr="", returnInput=False):
+    global returnValue
+
+    root = tkinter.Tk()
+    root.title(title)
+
+    returnValue = None
+
+    def closeDialog():
+        global returnValue
+
+        if inputStr != "":
+            inputValue = inputString.get()
+            if inputValue is not None and inputValue != "":
+                root.destroy()
+                if returnInput:
+                    returnValue = inputValue
+        else:
+            root.destroy()
+
+    label = ttk.Label(root, text=text + "\n\n" + inputStr)
+    label.pack(expand=True, padx=25,  pady=10)
+
+    if inputStr != "":
+        inputString = ttk.Entry(root, width=40)
+        inputString.pack(side="top", pady=10)
+
+    continueButton = ttk.Button(root, text="Ok", command=closeDialog)
+    continueButton.pack(side="bottom")
+
+    root.mainloop()
+    if returnInput:
+        if returnValue == "True":
+            returnValue = True
+        elif returnValue == "False":
+            returnValue = False
+        return returnValue
 
 
 def possiblePawnMoves():  # Funktion die alle möglichen Bewegungen für den ausgewählten Bauern zurückgibt
@@ -430,7 +470,7 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
                 sFigure = ""
                 while sFigure == "":
                     if playerEnemy != activePlayer:
-                        eFigure = int(input("\nBauern ersetzen durch '1' Turm, '2' Pferd, '3' Läufer, '4' Dame: "))  # Leider hier UI-technisch sehr unschön, ging aber leider nicht anders, da TigerJython auf Maus Callbacks anscheinend Fenster erstellen, diese aber nicht mehr mit Inhalt füllen kann
+                        eFigure = int(informationDialog("Bauern ersetzen durch: ", "", "Bauern ersetzen durch '1' Turm, '2' Pferd, '3' Läufer, '4' Dame: ", True))
                         clientSocket.send(str(eFigure).encode())
 
                     eFigure = int(clientSocket.recv(1024).decode())

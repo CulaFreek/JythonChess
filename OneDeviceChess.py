@@ -3,6 +3,8 @@ import os
 import sys
 import time
 import Values
+import tkinter
+from tkinter import ttk
 
 if __name__ == "__main__":
     sys.exit("Starte Gamemode.py, um das Spiel zu starten")
@@ -49,6 +51,7 @@ activePlayerText = "Weiss"
 enemy = "black"
 inputAllowed = True
 moves = 0
+returnValue = None
 
 
 def repaint():  # Neu zeichen des Schachfeldes nach einer Bewegung --->>> Einfachste Möglichkeit Figur texturen wieder vom Feld zu entfernen
@@ -87,6 +90,45 @@ def figureRepaint():
 
             pygameWindow.blit(image, (a, b))
     pygame.display.update()
+
+
+def informationDialog(title, text, inputStr="", returnInput=False):
+    global returnValue
+
+    root = tkinter.Tk()
+    root.title(title)
+
+    returnValue = None
+
+    def closeDialog():
+        global returnValue
+
+        if inputStr != "":
+            inputValue = inputString.get()
+            if inputValue is not None and inputValue != "":
+                root.destroy()
+                if returnInput:
+                    returnValue = inputValue
+        else:
+            root.destroy()
+
+    label = ttk.Label(root, text=text + "\n\n" + inputStr)
+    label.pack(expand=True, padx=25,  pady=10)
+
+    if inputStr != "":
+        inputString = ttk.Entry(root, width=40)
+        inputString.pack(side="top", pady=10)
+
+    continueButton = ttk.Button(root, text="Ok", command=closeDialog)
+    continueButton.pack(side="bottom")
+
+    root.mainloop()
+    if returnInput:
+        if returnValue == "True":
+            returnValue = True
+        elif returnValue == "False":
+            returnValue = False
+        return returnValue
 
 
 def possiblePawnMoves():  # Funktion die alle möglichen Bewegungen für den ausgewählten Bauern zurückgibt
@@ -296,24 +338,19 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
                 schlagenEnPassant = [moves + 1, sFieldNumber + 8, mFieldNumber]
         
             if (mColumn == 1 and sFigure.startswith("white")) or (mColumn == 8 and sFigure.startswith("black")):  # Falls ein Bauer sich auf die gegnerische letzte Linie begibt, tauscht er seinen Bauern gegen einen Turm, Pferd, Läufer oder eine Dame ein
-                sure = False
                 sFigure = ""
-                while not sure or sFigure == "":
-                    eFigure = int(input("\nBauern ersetzen durch '1' Turm, '2' Pferd, '3' Läufer, '4' Dame: "))  # Leider hier UI-technisch sehr unschön, ging aber leider nicht anders, da TigerJython auf Maus Callbacks anscheinend Fenster erstellen, diese aber nicht mehr mit Inhalt füllen kann
+                while sFigure == "":
+                    eFigure = int(informationDialog("Bauern ersetzen durch: ", "", "Bauern ersetzen durch '1' Turm, '2' Pferd, '3' Läufer, '4' Dame: ", True))
                     if eFigure == 1:
-                        output = "Turm"
                         eFigure = "_rook"
                         eFigureTexture = "_2.svg"
                     elif eFigure == 2:
-                        output = "Pferd"
                         eFigure = "_knight"
                         eFigureTexture = "_3.svg"
                     elif eFigure == 3:
-                        output = "Läufer"
                         eFigure = "_bishop"
                         eFigureTexture = "_4.svg"
                     elif eFigure == 4:
-                        output = "Dame"
                         eFigure = "_queen"
                         eFigureTexture = "_1.svg"
                     else:
@@ -321,8 +358,6 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
 
                     sFigure = sFigureColor + eFigure
                     sFigureTexture = dirLocation + "chess" + sFigureColor + eFigureTexture
-
-                    sure = bool(input("\nMöchtest du deinen Bauern wirklich durch eine*n " + output + " ersetzen? \n'True' oder 'False': "))
 
         if sFigure.endswith("king"):  # Deaktivieren der Rochade-Möglichkeit für die entsprechende Figur, falls sich diese bewegt
             if sFigure.startswith("white"):
@@ -553,15 +588,15 @@ def figureSelect(posX, posY):  # Funktion die auf Aufruf des obigen Maus-callbac
                                 
                                 inputAllowed = False  # Weiteren Input nach Spielende verhindern
                                 pygame.display.set_caption("SPIELENDE   |   " + activePlayerText + " hat das Spiel gewonnen")  # Titel am Spielende aktualisieren
-                                print("\n" + activePlayerText + " hat das Spiel gewonnen!")  # , title="Schachmatt   |   " + activePlayerText + " gewinnt das Spiel")
+                                informationDialog("Schachmatt   |   " + activePlayerText + " gewinnt das Spiel", activePlayerText + " hat das Spiel gewonnen!")
                                 
                             if not checkMate and check:
-                                print("\n" + activePlayerText + ", du stehst im Schach \nSchütze deinen Koenig!")  # , title="SCHACH")  # Ausgabe 'Schach'
+                                informationDialog("SCHACH", activePlayerText + ", du stehst im Schach \nSchütze deinen Koenig!")
                                 
                             if stalemate:
                                 inputAllowed = False  # Weiteren Input nach Spielende verhindern
                                 pygame.display.set_caption("SPIELENDE   |   Unentschieden")  # Titel am Spielende aktualisieren
-                                print("\nUnentschieden!")  # , title="Patt   |   Niemand gewinnt das Spiel")
+                                informationDialog("Patt   |   Niemand gewinnt das Spiel", "Unentschieden!")
                                 
                             selectedField = []
                             break
