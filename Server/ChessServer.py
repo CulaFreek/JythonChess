@@ -1,49 +1,58 @@
+import Values
 import socket
 import threading
 import random
 import datetime
 
 games = {}
+version = Values.version
 
 
 def handleClient(clientSocket):
     messageTime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     try:
-        openGames = ', '.join(games.keys()) or "Keine offenen Games"  # Liste der offenen Game-rooms an den Client senden
-        clientSocket.send("Verfügbare Games: '{}'".format(openGames).encode())
-        gameCode = clientSocket.recv(1024).decode()  # Auf Beitrittsentscheidung des Clients warten
-        
-        if gameCode not in games:  # Überprüfen, ob das Game bereits existiert oder erstellt werden muss
-            games[gameCode] = [clientSocket]  # Falls das Spiel nicht existiert neues erstellen
-            clientSocket.send("Game {} erstellt \nWarte auf weitere Mitglieder...".format(gameCode).encode())
-            print("[" + messageTime + "]: Game {} erstellt".format(gameCode))
-        else:
-            if len(games[gameCode]) >= 2:  # Bestehendem Game beitreten
-                clientSocket.send("Das Game {} ist voll! Bitte erstelle ein neues Game oder joine einem anderem".format(gameCode).encode())
-            else:
-                games[gameCode].append(clientSocket)
-                clientSocket.send("Du bist dem Game {} beigetreten".format(gameCode).encode())
+        decision = clientSocket.recv(1024).decode()
 
-            while len(games[gameCode]) < 2:  # Auf Beitritt des 2.ten Spielers warten
-                clientSocket.send("Warte auf weiteren Spieler...".encode())
-            
-            randomNumber = random.randint(0, 1)  # Farbzufallsgenerator, damit der Spieler, der sich als Erstes verbindet nicht zwangsweise Weiß spielt
-            if randomNumber == 0:
-                member = games[gameCode]
-                member[0].send("black".encode())
-                clientSocket.send("white".encode())
-            else:
-                member = games[gameCode]
-                member[0].send("white".encode())
-                clientSocket.send("black".encode())
+        if decision == "versionsabfrage":
+            clientSocket.send(version.encode())
+            clientSocket.close()
 
-        while True:
-            data = clientSocket.recv(1024)
-            if not data:
-                break
-            message = data
-            broadcast(message, games[gameCode])
+        elif decision == "spielen":
+            openGames = ', '.join(games.keys()) or "Keine offenen Games"  # Liste der offenen Game-rooms an den Client senden
+            clientSocket.send("Verfügbare Games: '{}'".format(openGames).encode())
+            gameCode = clientSocket.recv(1024).decode()  # Auf Beitrittsentscheidung des Clients warten
+
+            if gameCode not in games:  # Überprüfen, ob das Game bereits existiert oder erstellt werden muss
+                games[gameCode] = [clientSocket]  # Falls das Spiel nicht existiert neues erstellen
+                clientSocket.send("Game {} erstellt \nWarte auf weitere Mitglieder...".format(gameCode).encode())
+                print("[" + messageTime + "]: Game {} erstellt".format(gameCode))
+            else:
+                if len(games[gameCode]) >= 2:  # Bestehendem Game beitreten
+                    clientSocket.send("Das Game {} ist voll! Bitte erstelle ein neues Game oder joine einem anderem".format(gameCode).encode())
+                else:
+                    games[gameCode].append(clientSocket)
+                    clientSocket.send("Du bist dem Game {} beigetreten".format(gameCode).encode())
+
+                while len(games[gameCode]) < 2:  # Auf Beitritt des 2.ten Spielers warten
+                    clientSocket.send("Warte auf weiteren Spieler...".encode())
+
+                randomNumber = random.randint(0, 1)  # Farbzufallsgenerator, damit der Spieler, der sich als Erstes verbindet nicht zwangsweise Weiß spielt
+                if randomNumber == 0:
+                    member = games[gameCode]
+                    member[0].send("black".encode())
+                    clientSocket.send("white".encode())
+                else:
+                    member = games[gameCode]
+                    member[0].send("white".encode())
+                    clientSocket.send("black".encode())
+
+            while True:
+                data = clientSocket.recv(1024)
+                if not data:
+                    break
+                message = data
+                broadcast(message, games[gameCode])
 
     except Exception as e:
         print("[" + messageTime + "]: Fehler beim Umgang mit Client: {}".format(e))

@@ -92,7 +92,7 @@ def figureRepaint():
     pygame.display.update()
 
 
-def informationDialog(title, text, inputStr="", returnInput=False):
+def informationDialog(title, text, inputStr="", returnInputAsBool=False):
     global returnValue
 
     root = tkinter.Tk()
@@ -107,8 +107,7 @@ def informationDialog(title, text, inputStr="", returnInput=False):
             inputValue = inputString.get()
             if inputValue is not None and inputValue != "":
                 root.destroy()
-                if returnInput:
-                    returnValue = inputValue
+                returnValue = inputValue
         else:
             root.destroy()
 
@@ -123,12 +122,12 @@ def informationDialog(title, text, inputStr="", returnInput=False):
     continueButton.pack(side="bottom")
 
     root.mainloop()
-    if returnInput:
+    if returnInputAsBool:
         if returnValue == "True":
             returnValue = True
-        elif returnValue == "False":
+        else:
             returnValue = False
-        return returnValue
+    return returnValue
 
 
 def possiblePawnMoves():  # Funktion die alle möglichen Bewegungen für den ausgewählten Bauern zurückgibt
@@ -340,7 +339,7 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
             if (mColumn == 1 and sFigure.startswith("white")) or (mColumn == 8 and sFigure.startswith("black")):  # Falls ein Bauer sich auf die gegnerische letzte Linie begibt, tauscht er seinen Bauern gegen einen Turm, Pferd, Läufer oder eine Dame ein
                 sFigure = ""
                 while sFigure == "":
-                    eFigure = int(informationDialog("Bauern ersetzen durch: ", "", "Bauern ersetzen durch '1' Turm, '2' Pferd, '3' Läufer, '4' Dame: ", True))
+                    eFigure = int(informationDialog("Bauern ersetzen durch: ", "", "Bauern ersetzen durch '1' Turm, '2' Pferd, '3' Läufer, '4' Dame: "))
                     if eFigure == 1:
                         eFigure = "_rook"
                         eFigureTexture = "_2.svg"
@@ -663,32 +662,36 @@ def startGame(bot):
     import botChess as BC
     global pygameWindow
     global gameStart
-    global inputAllowed
+
+    showPygameWindow = True
 
     pygame.init()
 
     pygameWindow = pygame.display.set_mode((800 * mScreenW, 800 * mScreenH))  # Feste Fenstergröße, in die das Schachfeld perfekt hinein passt
     gameStart = time.time()  # Zeit des Spielstarts speichern
+    icon = pygame.image.load(dirLocation + "icon.ico")
+    pygame.display.set_icon(icon)
+
     repaint()  # Erstes Zeichnen des Spielfeldes
     if bot:
-        while inputAllowed:
+        while showPygameWindow:
             if activePlayer == "white":
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         x, y = event.pos
                         figureSelect(x, y)
                     if event.type == pygame.QUIT:
-                        inputAllowed = False
+                        showPygameWindow = False
             else:
                 BC.getMove()
 
     else:
-        while inputAllowed:
+        while showPygameWindow:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     x, y = event.pos
                     figureSelect(x, y)
                 if event.type == pygame.QUIT:
-                    inputAllowed = False
+                    showPygameWindow = False
 
     pygame.quit()

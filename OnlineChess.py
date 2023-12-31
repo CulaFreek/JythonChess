@@ -60,6 +60,7 @@ quitGame = False
 onlineConnection = False
 moves = 0
 returnValue = None
+showPygameWindow = True
 
 
 def repaint():  # Neu zeichen des Schachfeldes nach einer Bewegung --->>> Einfachste Möglichkeit Figur texturen wieder vom Feld zu entfernen
@@ -106,6 +107,7 @@ def startClient():  # Funktion zum Starten des Clients / verbinden mit dem Serve
         try:  # Falls keine Verbindung mit dem Server zustande kommt: Fehler abfangen, Programm durch Sys-exit beenden mit entsprechender Nachricht
             clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             clientSocket.connect(('jythonchess.de', 8888))  # Verbinden mit dem Server, falls möglich
+            clientSocket.send("spielen".encode())
             openGames = clientSocket.recv(1024)  # Erhalten der offenen Spiellobby-Codes, damit dem Nutzer bekannt ist, welche Spielräume offen sind
             if openGames is not None:
                 onlineConnection = True
@@ -113,11 +115,10 @@ def startClient():  # Funktion zum Starten des Clients / verbinden mit dem Serve
             if time.time() - gameStart <= 10 and not onlineConnection:
                 sys.exit("Es konnte keine Verbindung zum Server hergestellt werden")  # Mitteilung, dass kein Verbindungsaufbau möglich ist
             else:
-                gameCode = informationDialog("Gib deinen Spielcode ein", "Willkommen! \n\nBitte gib einen Game-Code ein oder erstelle einen neuen \n" + openGames.decode(), "Gib einen Game-Code ein: ", True)
+                gameCode = informationDialog("Gib deinen Spielcode ein", "Willkommen! \nBitte gib einen Game-Code ein oder erstelle einen neuen \n" + openGames.decode(), "Gib einen Game-Code ein: ")
                 clientSocket.send(gameCode.encode())
                 
                 gameCreationSuccess = clientSocket.recv(1024)  # Auf Bestätigung des Servers warten
-                informationDialog("Erfolgreiche Spielerstellung", gameCreationSuccess.decode())
                 
                 playerEnemy = clientSocket.recv(1024).decode()  # Gegner-Farbe empfangen
                 if playerEnemy == "white":
@@ -126,7 +127,7 @@ def startClient():  # Funktion zum Starten des Clients / verbinden mit dem Serve
                 else:
                     yourColor = "Weiss"
                     playerEnemyText = "Schwarz"
-                informationDialog("Spiel Information", "--> Du spielst " + yourColor + " <--")
+                informationDialog("Spiel Information", gameCreationSuccess.decode() + "\n\n--> Du spielst " + yourColor + " <--")
                 
                 receiveThread = threading.Thread(target=receiveMessages, args=(clientSocket,))
                 receiveThread.start()  # Nachrichtenempfangs-Thread starten
@@ -139,6 +140,7 @@ def receiveMessages(cSocket):  # Funktion zum Empfangen von Zügen, sowie dem Sp
     global rochadeAllowed
     global inputAllowed
     global quitGame
+    global showPygameWindow
 
     try:
         while True:  # Muss durchgängig laufen, da zu jedem Zeitpunkt Bewegungen empfangen werden müssen
@@ -151,11 +153,11 @@ def receiveMessages(cSocket):  # Funktion zum Empfangen von Zügen, sowie dem Sp
             if data == b"Mitspieler left game":  # Falls der Mitspieler das Spiel verlässt
                 inputAllowed = False
                 if not quitGame:
-                    informationDialog("Dein Mitspieler hat das Spiel verlassen", "Dein Mitspieler hat das Spiel verlassen!", "Möchtest du das Spiel schließen - ein Reconnect ist nicht möglich, zum spielen Programm neustarten!: ", True)
+                    quitGame = informationDialog("Dein Mitspieler hat das Spiel verlassen", "Dein Mitspieler hat das Spiel verlassen!", "Möchtest du das Spiel schließen - ein Reconnect ist nicht möglich, zum spielen Programm neustarten! ('True' oder 'False'): ", True)
                 if quitGame:
                     informationDialog("Spiel verlassen!", "Du hast das Spiel verlassen")
+                    showPygameWindow = False
                     cSocket.close()
-                    sys.exit("Spiel geschlossen!")
                 else:
                     quitGame = True  # Vermeiden eines Fehlers, durch den das Spiel im Folgenden nicht mehr geschlossen werden könnte
                     break
@@ -214,14 +216,20 @@ def closeGame():  # Funktion zum Schließen des Client-Sockets, damit die Spiele
         if close:
             informationDialog("Spiel verlassen", "Spiel verlassen!")
             inputAllowed = False
+            return True
+        else:
+            return False
     else:
         close = informationDialog("Spiel verlassen?", "", "Möchtest du das Spiel wirklich verlassen? ('True' oder 'False'): ", True)
         if close:
             quitGame = True
             clientSocket.send("Mitspieler left game".encode())
+            return True
+        else:
+            return False
 
 
-def informationDialog(title, text, inputStr="", returnInput=False):
+def informationDialog(title, text, inputStr="", returnInputAsBool=False):
     global returnValue
 
     root = tkinter.Tk()
@@ -236,8 +244,7 @@ def informationDialog(title, text, inputStr="", returnInput=False):
             inputValue = inputString.get()
             if inputValue is not None and inputValue != "":
                 root.destroy()
-                if returnInput:
-                    returnValue = inputValue
+                returnValue = inputValue
         else:
             root.destroy()
 
@@ -252,12 +259,12 @@ def informationDialog(title, text, inputStr="", returnInput=False):
     continueButton.pack(side="bottom")
 
     root.mainloop()
-    if returnInput:
+    if returnInputAsBool:
         if returnValue == "True":
             returnValue = True
-        elif returnValue == "False":
+        else:
             returnValue = False
-        return returnValue
+    return returnValue
 
 
 def possiblePawnMoves():  # Funktion die alle möglichen Bewegungen für den ausgewählten Bauern zurückgibt
@@ -470,7 +477,7 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
                 sFigure = ""
                 while sFigure == "":
                     if playerEnemy != activePlayer:
-                        eFigure = int(informationDialog("Bauern ersetzen durch: ", "", "Bauern ersetzen durch '1' Turm, '2' Pferd, '3' Läufer, '4' Dame: ", True))
+                        eFigure = int(informationDialog("Bauern ersetzen durch: ", "", "Bauern ersetzen durch '1' Turm, '2' Pferd, '3' Läufer, '4' Dame: "))
                         clientSocket.send(str(eFigure).encode())
 
                     eFigure = int(clientSocket.recv(1024).decode())
@@ -767,26 +774,29 @@ def figureSelect(posX, posY):  # Funktion die auf Aufruf des obigen Maus-callbac
 
 
 def startGame():
+    global showPygameWindow
     global pygameWindow
     global gameStart
-    global inputAllowed
+
+    gameStart = time.time()  # Zeit des Spielstarts speichern
+    startClient()
 
     pygame.init()
 
     pygameWindow = pygame.display.set_mode((int(800 * mScreenW), int(800 * mScreenH)))  # Feste Fenstergröße, in die das Schachfeld perfekt hinein passt
     pygame.display.set_caption("Python-Online-Schach auf jythonchess.de")
-
-    gameStart = time.time()  # Zeit des Spielstarts speichern
-    startClient()
+    icon = pygame.image.load(dirLocation + "icon.ico")
+    pygame.display.set_icon(icon)
 
     repaint()  # Erstes Zeichnen des Spielfeldes
-    while inputAllowed:
+    while showPygameWindow:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 figureSelect(x, y)
             if event.type == pygame.QUIT:
-                closeGame()
-                inputAllowed = False
+                closeWindow = closeGame()
+                if closeWindow:
+                    showPygameWindow = False
 
     pygame.quit()
