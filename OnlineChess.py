@@ -518,6 +518,14 @@ def figureMove(sourceIndex, moveToIndex, automatic=False, illegalMoveTest=False)
                 if sFigure == "black_2_rook":
                     rochadeMoved[5] = True
 
+        if not automatic and not illegalMoveTest:
+            if sFigure.endswith("king"):
+                if playerEnemy != activePlayer:
+                    dataToSend = pickle.dumps(rochadeFigurePlace)
+                    clientSocket.send(dataToSend)
+                data = clientSocket.recv(1024)
+                rochadeFigurePlace = list(pickle.loads(data))
+
     mFigure = "" + sFigure
     mFigureTexture = "" + sFigureTexture
     mFigureColor = "" + sFigureColor
