@@ -88,6 +88,10 @@ def figureRepaint():
             a = (centerX - image_rect.width // 2)
             b = (centerY - image_rect.height // 2)
 
+            if activePlayer == "black":
+                a = a - (2*a) + screenW - image_rect.width
+                b = b - (2*b) + screenH - image_rect.height
+
             pygameWindow.blit(image, (a, b))
     pygame.display.update()
 
@@ -605,7 +609,14 @@ def figureSelect(posX, posY):  # Funktion die auf Aufruf des obigen Maus-callbac
                     decolor()
                     selectedField.append((centerX, centerY, fieldTexture, figure, fieldNumber, column, row))  # Nach leeren und entfärben wird hier die neu ausgewählte Figur aufgenommen
                     selectedField.append(index)  # Speichern des Indexes des ausgewählten Feldes | Wichtig für die move Funktion
-                    pygame.draw.rect(pygameWindow, (173, 216, 230), (centerX - 50 * mScreenW, centerY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
+                    if activePlayer == "black":
+                        fX = centerX - (2 * centerX) + screenW
+                        fY = centerY - (2 * centerY) + screenH
+                    else:
+                        fX = centerX
+                        fY = centerY
+
+                    pygame.draw.rect(pygameWindow, (173, 216, 230), (fX - 50 * mScreenW, fY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
                     figureRepaint()
 
                     lastPossibleFields, possibleHitFields = checkFigureType(figure)  # Funktionsaufrufe je nach ausgewählter Figur
@@ -641,16 +652,25 @@ def figureSelect(posX, posY):  # Funktion die auf Aufruf des obigen Maus-callbac
 
                     for f in lastPossibleFields:  # Färben der möglichen Züge
                         fX, fY, fieldTexture, fNumber = f
+                        if activePlayer == "black":
+                            fX = fX - (2 * fX) + screenW
+                            fY = fY - (2 * fY) + screenH
                         pygame.draw.rect(pygameWindow, (63, 255, 0), (fX - 50 * mScreenW, fY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
 
                     for f in rochadeFigurePlace:  # Färben der Felder für König und Turm bei einer Rochade
                         for t in f:
                             if type(t) is tuple:
                                 tX, tY, fieldTexture = t
+                                if activePlayer == "black":
+                                    tX = tX - (2 * tX) + screenW
+                                    tY = tY - (2 * tY) + screenH
                                 pygame.draw.rect(pygameWindow, (192, 0, 255), (tX - 50 * mScreenW, tY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
 
                     for f in possibleHitFields:
                         fX, fY, fieldTexture, fNumber = f
+                        if activePlayer == "black":
+                            fX = fX - (2 * fX) + screenW
+                            fY = fY - (2 * fY) + screenH
                         pygame.draw.rect(pygameWindow, (250, 0, 0), (fX - 50 * mScreenW, fY - 50 * mScreenH, 100 * mScreenW, 100 * mScreenH))
 
                     figureRepaint()
@@ -690,6 +710,9 @@ def startGame(bot):
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     x, y = event.pos
+                    if activePlayer == "black":
+                        x = x - (2 * x) + screenW
+                        y = y - (2 * y) + screenH
                     figureSelect(x, y)
                 if event.type == pygame.QUIT:
                     showPygameWindow = False
